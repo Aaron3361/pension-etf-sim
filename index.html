@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연금 ETF 시뮬레이터</title>
+<meta name="description" content="연금계좌 ETF 구성을 몇 가지 질문으로 계산해 보는 교육용 시뮬레이터 (투자 권유 아님)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 토스 스타일 (dashboard.py와 같은 색): 질문 한 줄 + 큰 선택 카드 + 아래 고정 버튼 */
+  :root { --bg: #f2f4f6; --surface: #fff; --surface-2: #f2f4f6; --seg: #e5e8eb; --border: #e5e8eb; --text: #191f28; --text-2: #4e5968;
+          --muted: #8b95a1; --accent: #3182f6; --accent-soft: #e8f3ff; --gain: #f04452; --loss: #3182f6; --warn: #b86e00; --warn-soft: #fff4dc;
+          --shadow: 0 1px 3px rgba(0,0,0,.04); color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #17171c; --surface: #202027; --surface-2: #2c2c35; --seg: #2c2c35; --border: #33333d; --text: #ececf1;
+      --text-2: #b0b8c1; --muted: #7e8590; --accent: #4c94ff; --accent-soft: #1c2b44; --gain: #ff6b78; --loss: #5aa0ff; --warn: #ffc35a; --warn-soft: #3a3020;
+      --shadow: none; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #17171c; --surface: #202027; --surface-2: #2c2c35; --seg: #2c2c35; --border: #33333d; --text: #ececf1;
+      --text-2: #b0b8c1; --muted: #7e8590; --accent: #4c94ff; --accent-soft: #1c2b44; --gain: #ff6b78; --loss: #5aa0ff; --warn: #ffc35a; --warn-soft: #3a3020;
+      --shadow: none; color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; letter-spacing: -0.01em; word-break: keep-all;
+         font-family: "Pretendard Variable", Pretendard, "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+         -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 120px; min-height: 100vh; }
+  .top { display: flex; align-items: center; gap: 10px; padding: 16px 0 8px; }
+  .back { font: inherit; font-size: 15px; font-weight: 600; color: var(--text-2); background: none; border: 0; padding: 6px 2px; cursor: pointer; }
+  .back[hidden] { display: none; }
+  .dots { flex: 1; display: flex; gap: 5px; justify-content: flex-end; }
+  .dots i { width: 22px; height: 4px; border-radius: 2px; background: var(--seg); }
+  .dots i.on { background: var(--accent); }
+  .step { padding-top: 18px; }
+  .step[hidden] { display: none; }
+  .kicker { font-size: 14px; font-weight: 700; color: var(--accent); }
+  h1 { font-size: 26px; line-height: 1.35; font-weight: 700; letter-spacing: -0.03em; margin-top: 6px; }
+  .lead { color: var(--text-2); font-size: 15px; margin-top: 8px; }
+  .opts { display: grid; gap: 10px; margin-top: 22px; }
+  .opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; font: inherit; color: var(--text); background: var(--surface);
+         border: 2px solid transparent; border-radius: 18px; padding: 18px 18px; cursor: pointer; box-shadow: var(--shadow); }
+  .opt:hover { border-color: var(--seg); }
+  .opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .opt:focus-visible, .btn:focus-visible, .chip:focus-visible, .back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .opt b { display: block; font-size: 17px; font-weight: 700; }
+  .opt small { display: block; font-size: 14px; color: var(--text-2); margin-top: 2px; }
+  .opt .r { margin-left: auto; text-align: right; flex: none; font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .opt .r em { display: block; font-style: normal; font-size: 15px; font-weight: 700; color: var(--loss); }
+  .opt.ghost { background: transparent; border: 2px dashed var(--seg); box-shadow: none; justify-content: center; color: var(--text-2); font-weight: 600; }
+  .field { margin-top: 24px; background: var(--surface); border-radius: 18px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .field label { font-size: 13px; color: var(--muted); }
+  .field input { display: block; width: 100%; font: inherit; font-size: 28px; font-weight: 700; color: var(--text); background: none; border: 0; outline: none;
+                 margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .field .read { font-size: 15px; color: var(--accent); font-weight: 600; min-height: 1.5em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { font: inherit; font-size: 15px; font-weight: 600; color: var(--text); background: var(--surface); border: 0; border-radius: 999px; padding: 9px 16px;
+          cursor: pointer; box-shadow: var(--shadow); }
+  .chip[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .note { margin-top: 14px; font-size: 14px; color: var(--text-2); }
+  .warn { margin-top: 14px; padding: 12px 16px; border-radius: 14px; background: var(--warn-soft); font-size: 14px; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
+  .bar .in { max-width: 560px; margin: 0 auto; }
+  .btn { display: block; width: 100%; font: inherit; font-size: 17px; font-weight: 700; color: #fff; background: var(--accent); border: 0; border-radius: 16px;
+         padding: 16px; cursor: pointer; }
+  .btn:disabled { background: var(--seg); color: var(--muted); cursor: default; }
+  .sum { margin-top: 22px; background: var(--surface); border-radius: 18px; padding: 6px 18px; box-shadow: var(--shadow); }
+  .sum div { display: flex; align-items: center; gap: 10px; padding: 14px 0; border-top: 1px solid var(--border); }
+  .sum div:first-child { border-top: 0; }
+  .sum span { color: var(--text-2); font-size: 14px; width: 92px; flex: none; }
+  .sum b { flex: 1; font-size: 16px; }
+  .sum button { font: inherit; font-size: 14px; font-weight: 600; color: var(--accent); background: none; border: 0; cursor: pointer; }
+  .consent { margin-top: 22px; background: var(--surface); border-radius: 18px; padding: 18px; font-size: 14.5px; color: var(--text-2); box-shadow: var(--shadow); }
+  .consent li { margin: 6px 0 0 18px; }
+  .foot { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <button type="button" class="back" id="back" hidden>← 이전</button>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </div>
+
+  <!-- 0. 시작 -->
+  <section class="step" data-step="0">
+    <p class="kicker">연금 ETF 시뮬레이터</p>
+    <h1>몇 가지만 고르면<br>ETF 구성을 계산해 드려요</h1>
+    <p class="lead" id="dataInfo">질문 6개 · 1분이면 끝나요</p>
+    <div class="consent">
+      <b style="color:var(--text)">시작 전에 확인해 주세요</b>
+      <ul>
+        <li>과거 자료로 계산한 <b>교육용 시뮬레이션</b>이며 투자 권유가 아닙니다.</li>
+        <li>과거 결과가 앞으로도 같다는 보장은 없고, 원금 손실이 날 수 있습니다.</li>
+        <li>투자 결정과 그 결과의 책임은 본인에게 있습니다.</li>
+        <li>입력한 금액은 이 브라우저 안에서만 계산하고 어디에도 보내지 않습니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 1. 계좌 -->
+  <section class="step" data-step="1" hidden>
+    <p class="kicker">1 / 6</p>
+    <h1>어떤 계좌로 투자하나요?</h1>
+    <div class="opts" data-key="account">
+      <button type="button" class="opt" data-v="pension_irp"><div><b>IRP · 퇴직연금(DC)</b><small>회사 퇴직연금, 개인 IRP · 위험자산 70%까지</small></div></button>
+      <button type="button" class="opt" data-v="pension_saving"><div><b>연금저축</b><small>연금저축펀드·연금저축계좌</small></div></button>
+      <button type="button" class="opt" data-v="general"><div><b>일반 증권계좌</b><small>해외 상장 ETF까지 포함</small></div></button>
+    </div>
+  </section>
+
+  <!-- 2. 처음 금액 -->
+  <section class="step" data-step="2" hidden>
+    <p class="kicker">2 / 6</p>
+    <h1>처음에 얼마를 넣을까요?</h1>
+    <div class="field"><label for="capital">금액 (원)</label>
+      <input id="capital" inputmode="numeric" autocomplete="off" placeholder="50,000,000"><div class="read" id="capitalRead"></div></div>
+    <div class="chips" data-for="capital">
+      <button type="button" class="chip" data-v="10000000">1천만</button><button type="button" class="chip" data-v="30000000">3천만</button>
+      <button type="button" class="chip" data-v="50000000">5천만</button><button type="button" class="chip" data-v="100000000">1억</button>
+    </div>
+    <p class="note" id="capitalNote"></p>
+  </section>
+
+  <!-- 3. 매달 적립 -->
+  <section class="step" data-step="3" hidden>
+    <p class="kicker">3 / 6</p>
+    <h1>매달 더 넣을 돈이 있나요?</h1>
+    <div class="field"><label for="monthly">매달 (원)</label>
+      <input id="monthly" inputmode="numeric" autocomplete="off" placeholder="0"><div class="read" id="monthlyRead"></div></div>
+    <div class="chips" data-for="monthly">
+      <button type="button" class="chip" data-v="0">없음</button><button type="button" class="chip" data-v="250000">25만</button>
+      <button type="button" class="chip" data-v="500000">50만</button><button type="button" class="chip" data-v="750000">75만</button>
+    </div>
+    <p class="note" id="monthlyNote"></p>
+  </section>
+
+  <!-- 4. 성향 -->
+  <section class="step" data-step="4" hidden>
+    <p class="kicker">4 / 6</p>
+    <h1>얼마나 흔들려도 괜찮나요?</h1>
+    <p class="lead">오른쪽은 지난 13년 동안 가장 크게 떨어졌던 폭이에요.</p>
+    <div class="opts" data-key="risk" id="riskOpts"></div>
+  </section>
+  <section class="step" data-step="4q" hidden>
+    <p class="kicker">성향 알아보기 · <span id="quizN">1</span> / 3</p>
+    <h1 id="quizQ"></h1>
+    <div class="opts" id="quizOpts"></div>
+  </section>
+
+  <!-- 5. 기간 -->
+  <section class="step" data-step="5" hidden>
+    <p class="kicker">5 / 6</p>
+    <h1>몇 년 동안 운용하나요?</h1>
+    <div class="opts" data-key="years">
+      <button type="button" class="opt" data-v="5"><div><b>5년</b></div></button>
+      <button type="button" class="opt" data-v="10"><div><b>10년</b></div></button>
+      <button type="button" class="opt" data-v="20"><div><b>20년</b></div></button>
+      <button type="button" class="opt" data-v="30"><div><b>30년</b></div></button>
+    </div>
+  </section>
+
+  <!-- 6. 목표 -->
+  <section class="step" data-step="6" hidden>
+    <p class="kicker">6 / 6</p>
+    <h1>목표 금액이 있나요?</h1>
+    <div class="opts">
+      <button type="button" class="opt" id="noTarget"><div><b>없어요</b><small id="defaultTargetText">넣은 돈을 물가(연 2%)만큼 불린 금액을 목표로 할게요</small></div></button>
+    </div>
+    <div class="field"><label for="target">직접 입력 (원)</label>
+      <input id="target" inputmode="numeric" autocomplete="off" placeholder="예: 200,000,000"><div class="read" id="targetRead"></div></div>
+  </section>
+
+  <!-- 7. 확인 -->
+  <section class="step" data-step="7" hidden>
+    <p class="kicker">마지막</p>
+    <h1>이대로 계산할까요?</h1>
+    <div class="sum" id="summary"></div>
+    <p class="foot" id="foot"></p>
+  </section>
+</div>
+<div class="bar" id="bar"><div class="in"><button type="button" class="btn" id="next">확인하고 시작하기</button></div></div>
+
+<script>
+(function () {
+  'use strict';
+  var ORDER = ['0', '1', '2', '3', '4', '5', '6', '7'];
+  var KEY = 'sim-wizard';
+  var state = { account: null, capital: null, monthly: null, risk: null, years: null, target: 0 };
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  var INDEX = null, cur = '0', quiz = [];
+  var QUIZ = [
+    { q: '이 돈을 언제쯤 쓸 계획인가요?', a: ['3년 안에', '3~10년 뒤', '10년 넘게 뒤'] },
+    { q: '1년 만에 -20%가 되면 어떻게 할까요?', a: ['바로 팔아요', '기다려요', '더 사요'] },
+    { q: '1년에 견딜 수 있는 손실은요?', a: ['-5%까지', '-15%까지', '-25% 넘어도 괜찮아요'] }
+  ];
+  var SCORE_TO_RISK = ['very_conservative', 'very_conservative', 'conservative', 'moderate', 'moderate', 'aggressive', 'very_aggressive'];
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function won(v) {   // 1억 2,345만원 / 4,977만원 / 12,000원
+    v = Math.round(v || 0);
+    if (v >= 1e8) { var e = Math.floor(v / 1e8), m = Math.round((v % 1e8) / 1e4); return e + '억' + (m ? ' ' + m.toLocaleString() + '만' : '') + '원'; }
+    if (v >= 1e4) return Math.round(v / 1e4).toLocaleString() + '만원';
+    return v.toLocaleString() + '원';
+  }
+  function num(s) { var n = parseInt(String(s).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? null : n; }
+  function isPension() { return state.account && state.account !== 'general'; }
+  function defaultTarget() {
+    var y = state.years || 10, months = y * 12, m = Math.pow(1.02, 1 / 12) - 1, mon = state.monthly || 0;
+    return Math.round(((state.capital || 0) * Math.pow(1 + m, months) + mon * ((Math.pow(1 + m, months) - 1) / m)) / 1e4) * 1e4;
+  }
+
+  function show(step, push) {
+    cur = step;
+    document.querySelectorAll('.step').forEach(function (s) { s.hidden = s.dataset.step !== step; });
+    var i = ORDER.indexOf(step === '4q' ? '4' : step);
+    document.getElementById('back').hidden = step === '0';
+    document.getElementById('dots').innerHTML = [1, 2, 3, 4, 5, 6].map(function (n) { return '<i class="' + (n <= i ? 'on' : '') + '"></i>'; }).join('');
+    render(step);
+    if (push) history.pushState({ step: step }, '', '#' + step);
+    window.scrollTo(0, 0);
+    var first = document.querySelector('.step:not([hidden]) input, .step:not([hidden]) .opt');
+    if (first && step !== '0') try { first.focus({ preventScroll: true }); } catch (e) {}
+  }
+  function go(step) { show(step, true); }
+  function nextOf(step) { return ORDER[ORDER.indexOf(step === '4q' ? '4' : step) + 1]; }
+
+  function render(step) {
+    var btn = document.getElementById('next'), bar = document.getElementById('bar');
+    var auto = { '1': 1, '4': 1, '4q': 1, '5': 1 };   // 카드를 고르면 바로 다음으로
+    bar.hidden = !!auto[step] && step !== '6';
+    document.querySelectorAll('.opts[data-key]').forEach(function (box) {
+      box.querySelectorAll('.opt').forEach(function (b) { b.setAttribute('aria-pressed', String(String(state[box.dataset.key]) === b.dataset.v)); });
+    });
+    if (step === '0') { btn.textContent = '확인하고 시작하기'; btn.disabled = false; }
+    if (step === '2') { field('capital', '처음에 넣을 금액을 입력하세요', function (v) { return v >= 100000; }); }
+    if (step === '3') {
+      field('monthly', '', function (v) { return v >= 0; });
+      document.getElementById('monthlyNote').textContent = isPension() ? '연금계좌는 1년에 1,800만원(월 150만원)까지 넣을 수 있어요. 넘는 금액은 한도로 계산해요.' : '';
+    }
+    if (step === '4') renderRisk();
+    if (step === '6') {
+      document.getElementById('defaultTargetText').textContent = '넣은 돈을 물가(연 2%)만큼 불린 ' + won(defaultTarget()) + '을 목표로 할게요';
+      document.getElementById('noTarget').setAttribute('aria-pressed', String(!state.target));
+      field('target', '', function (v) { return v > 0; }, true);
+    }
+    if (step === '7') renderSummary();
+  }
+
+  function field(id, _, valid, optional) {
+    var input = document.getElementById(id), read = document.getElementById(id + 'Read'), btn = document.getElementById('next');
+    var v = state[id];
+    input.value = v ? Number(v).toLocaleString() : (id === 'monthly' && v === 0 ? '0' : '');
+    function upd() {
+      var n = num(input.value);
+      read.textContent = n ? won(n) : (id === 'monthly' && n === 0 ? '매달 넣지 않아요' : '');
+      document.querySelectorAll('.chips[data-for="' + id + '"] .chip').forEach(function (c) { c.setAttribute('aria-pressed', String(+c.dataset.v === n)); });
+      if (id === 'capital') document.getElementById('capitalNote').textContent = n && n < 5000000 ? '금액이 작으면 비싼 ETF는 1주도 못 사서 일부 종목이 빠질 수 있어요.' : '';
+      if (id === 'target') { document.getElementById('noTarget').setAttribute('aria-pressed', String(!n)); btn.textContent = n ? '다음' : '목표 없이 다음'; btn.disabled = false; return; }
+      btn.textContent = '다음';
+      btn.disabled = !(n != null && valid(n));
+    }
+    input.oninput = function () {
+      var n = num(input.value), pos = input.value.length - input.selectionStart;
+      input.value = n == null ? '' : n.toLocaleString();
+      try { input.setSelectionRange(input.value.length - pos, input.value.length - pos); } catch (e) {}
+      upd();
+    };
+    input.onkeydown = function (e) { if (e.key === 'Enter' && !btn.disabled) btn.click(); };
+    upd();
+  }
+
+  function renderRisk() {
+    var box = document.getElementById('riskOpts'), acct = isPension() ? 'pension' : 'general';
+    box.innerHTML = (INDEX ? INDEX.profiles : []).map(function (p) {
+      var s = p[acct] || {};
+      return '<button type="button" class="opt" data-v="' + p.key + '" aria-pressed="' + (state.risk === p.key) + '"><div><b>' + esc(p.label) + '</b><small>' + esc(p.desc) + '</small></div>' +
+        (s.mdd != null ? '<div class="r">13년 중 최악<em>' + s.mdd.toFixed(1) + '%</em>연 ' + s.cagr.toFixed(1) + '%</div>' : '') + '</button>';
+    }).join('') + '<button type="button" class="opt ghost" id="quizStart">잘 모르겠어요 · 3문항으로 알아보기</button>';
+    if (!INDEX) box.insertAdjacentHTML('afterbegin', '<p class="warn">자료를 불러오지 못했습니다. 잠시 후 다시 시도하세요.</p>');
+  }
+  function renderQuiz() {
+    var i = quiz.length, Q = QUIZ[i];
+    document.getElementById('quizN').textContent = i + 1;
+    document.getElementById('quizQ').textContent = Q.q;
+    document.getElementById('quizOpts').innerHTML = Q.a.map(function (a, k) { return '<button type="button" class="opt" data-score="' + k + '"><div><b>' + esc(a) + '</b></div></button>'; }).join('');
+  }
+  function renderSummary() {
+    var p = INDEX && INDEX.profiles.filter(function (x) { return x.key === state.risk; })[0];
+    var acct = { pension_irp: 'IRP · 퇴직연금(DC)', pension_saving: '연금저축', general: '일반 증권계좌' }[state.account];
+    var rows = [['계좌', acct, '1'], ['처음 금액', won(state.capital), '2'], ['매달', state.monthly ? won(state.monthly) : '없음', '3'],
+                ['성향', p ? p.label : state.risk, '4'], ['기간', state.years + '년', '5'], ['목표', state.target ? won(state.target) : '물가 반영 ' + won(defaultTarget()), '6']];
+    document.getElementById('summary').innerHTML = rows.map(function (r) {
+      return '<div><span>' + r[0] + '</span><b>' + esc(r[1]) + '</b><button type="button" data-edit="' + r[2] + '">바꾸기</button></div>'; }).join('');
+    var btn = document.getElementById('next'); btn.textContent = '결과 보기'; btn.disabled = false;
+    document.getElementById('foot').textContent = INDEX ? '가격 기준 ' + INDEX.priceDate + ' · 자료 ' + INDEX.generated + ' 계산' : '';
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#quizStart')) { quiz = []; renderQuiz(); go('4q'); return; }
+    var opt = e.target.closest('.opts[data-key] .opt:not(.ghost)');
+    if (opt) {
+      var key = opt.parentNode.dataset.key;
+      state[key] = key === 'years' ? +opt.dataset.v : opt.dataset.v;
+      save(); render(cur);
+      setTimeout(function () { go(nextOf(cur)); }, 140);   // 고르면 바로 다음 페이지
+      return;
+    }
+    var qa = e.target.closest('#quizOpts .opt');
+    if (qa) {
+      quiz.push(+qa.dataset.score);
+      if (quiz.length < QUIZ.length) { renderQuiz(); return; }
+      state.risk = SCORE_TO_RISK[quiz.reduce(function (a, b) { return a + b; }, 0)]; save();
+      go('4');   // 추천 성향이 선택된 채로 돌아감 (바꿀 수 있음)
+      return;
+    }
+    var chip = e.target.closest('.chips .chip');
+    if (chip) {
+      var input = document.getElementById(chip.parentNode.dataset.for);
+      input.value = Number(chip.dataset.v).toLocaleString(); input.oninput();
+      return;
+    }
+    if (e.target.closest('#noTarget')) { state.target = 0; save(); go('7'); return; }
+    var ed = e.target.closest('[data-edit]');
+    if (ed) { go(ed.dataset.edit); return; }
+  });
+  document.getElementById('next').addEventListener('click', function () {
+    if (cur === '2') { state.capital = num(document.getElementById('capital').value); }
+    if (cur === '3') { state.monthly = num(document.getElementById('monthly').value) || 0; }
+    if (cur === '6') { state.target = num(document.getElementById('target').value) || 0; }
+    save();
+    if (cur === '7') {
+      // 금액은 주소의 # 뒤에만 담음 → 서버로 전송되지 않음
+      var h = 'a=' + state.account + '&c=' + state.capital + '&m=' + (state.monthly || 0) + '&r=' + state.risk + '&y=' + state.years + (state.target ? '&t=' + state.target : '');
+      var b = document.getElementById('next'); b.disabled = true; b.textContent = '결과 화면을 여는 중…';
+      location.href = 'result.html#' + h;
+      return;
+    }
+    go(nextOf(cur));
+  });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
+  window.addEventListener('popstate', function (e) { show(e.state && e.state.step ? e.state.step : '0', false); });
+
+  // 결과 화면의 [조건 바꾸기]로 왔으면 그 값으로 채움
+  if (/^#a=/.test(location.hash)) {
+    location.hash.slice(1).split('&').forEach(function (kv) {
+      var p = kv.split('='), map = { a: 'account', c: 'capital', m: 'monthly', r: 'risk', y: 'years', t: 'target' };
+      if (map[p[0]]) state[map[p[0]]] = /^(c|m|y|t)$/.test(p[0]) ? +p[1] : p[1];
+    });
+    save();
+  }
+  fetch('data/index.json').then(function (r) { return r.json(); }).then(function (d) {
+    INDEX = d;
+    document.getElementById('dataInfo').textContent = '질문 6개 · 1분이면 끝나요 · 가격 기준 ' + d.priceDate;
+    if (cur === '4') render('4');
+  }).catch(function () { if (cur === '4') render('4'); });
+  history.replaceState({ step: '0' }, '', location.pathname);
+  show(/^#a=/.test(location.hash) || state.account ? (/^#a=/.test(location.hash) ? '7' : '0') : '0', false);
+})();
+</script>
+</body>
+</html>
