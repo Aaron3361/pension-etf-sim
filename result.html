@@ -10,19 +10,19 @@
      강조는 파랑 하나. 수익은 빨강 ▲, 손실은 파랑 ▼(국내 증권 관습). 상태는 통과 초록 / 주의 빨강. 토스 로고·전용 글꼴은 쓰지 않음. */
   :root {
     --bg: #f2f4f6; --surface: #ffffff; --surface-2: #f2f4f6; --seg: #e5e8eb; --seg-on: #ffffff; --border: #e5e8eb;
-    --text: #191f28; --text-2: #4e5968; --muted: #6b7684;
-    --accent: #3182f6; --accent-soft: #d6e6fd;
-    --up: #03a05e; --up-soft: #e3f6ec; --down: #f04452; --down-soft: #ffeeee; --warn: #b86e00; --warn-soft: #fff4dc;
-    --gain: #f04452; --loss: #3182f6;
+    --text: #191f28; --text-2: #333d4b; --muted: #4e5968;
+    --accent: #1c6be0; --accent-soft: #dce9fd; --accent-strong: #1b64da;
+    --up: #00845a; --up-soft: #e3f6ec; --down: #d92b3a; --down-soft: #ffeeee; --warn: #955800; --warn-soft: #fff4dc;
+    --gain: #d92b3a; --loss: #1c6be0;
     --c-stock: #3182f6; --c-bond: #12a594; --c-reit: #e8772e; --c-cmdty: #8a63d2; --c-cash: #8b95a1;
     --chart-grid: #eef0f3; --shadow: 0 1px 3px rgba(0,0,0,.08);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #17171c; --surface: #202027; --surface-2: #2c2c35; --seg: #2c2c35; --seg-on: #4a4a55; --border: #33333d;
-      --text: #f2f2f5; --text-2: #c3c3c8; --muted: #9e9ea6;
-      --accent: #4593fc; --accent-soft: #1f3654;
+      --bg: #101014; --surface: #1e1e25; --surface-2: #2a2a33; --seg: #2c2c35; --seg-on: #4a4a55; --border: #33333d;
+      --text: #f7f7fa; --text-2: #dcdce1; --muted: #b8b8c0;
+      --accent: #5c9ffd; --accent-soft: #1f3654; --accent-strong: #1b64da;
       --up: #3fcf8e; --up-soft: #183326; --down: #ff6b78; --down-soft: #3d2227; --warn: #ffc35a; --warn-soft: #3a3020;
       --gain: #ff6b78; --loss: #4593fc;
       --c-stock: #4593fc; --c-bond: #2ec4b0; --c-reit: #f5924d; --c-cmdty: #a487e6; --c-cash: #9e9ea6;
@@ -31,9 +31,9 @@
     }
   }
   :root[data-theme="dark"] {
-    --bg: #17171c; --surface: #202027; --surface-2: #2c2c35; --seg: #2c2c35; --seg-on: #4a4a55; --border: #33333d;
-    --text: #f2f2f5; --text-2: #c3c3c8; --muted: #9e9ea6;
-    --accent: #4593fc; --accent-soft: #1f3654;
+    --bg: #101014; --surface: #1e1e25; --surface-2: #2a2a33; --seg: #2c2c35; --seg-on: #4a4a55; --border: #33333d;
+    --text: #f7f7fa; --text-2: #dcdce1; --muted: #b8b8c0;
+    --accent: #5c9ffd; --accent-soft: #1f3654; --accent-strong: #1b64da;
     --up: #3fcf8e; --up-soft: #183326; --down: #ff6b78; --down-soft: #3d2227; --warn: #ffc35a; --warn-soft: #3a3020;
     --gain: #ff6b78; --loss: #4593fc;
     --c-stock: #4593fc; --c-bond: #2ec4b0; --c-reit: #f5924d; --c-cmdty: #a487e6; --c-cash: #9e9ea6;
@@ -89,7 +89,7 @@
   .lead b { color: var(--text); font-weight: 600; }
   .hero-warn { margin-top: 12px; padding: 14px 18px; border-radius: 14px; background: var(--warn-soft); color: var(--text); font-size: 14.5px; }
   .hero-warn b { color: var(--warn); }
-  .badge { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 700; line-height: 1.5; vertical-align: 1px; }
+  .badge { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 13px; font-weight: 700; line-height: 1.5; vertical-align: 1px; }
   .mode-desc { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
   .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
   .kpi { background: var(--surface); border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
@@ -104,7 +104,7 @@
   .q { display: inline-grid; place-items: center; width: 17px; height: 17px; margin-left: 4px; padding: 0; border: 0; border-radius: 50%;
        background: var(--seg); color: var(--muted); font: 700 11px/1 system-ui, sans-serif; cursor: help; vertical-align: 2px;
        -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; flex: none; }
-  .q:hover, .q[aria-expanded="true"] { background: var(--accent); color: #fff; }
+  .q:hover, .q[aria-expanded="true"] { background: var(--accent-strong); color: #fff; }
   .q:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .tip { position: fixed; z-index: 50; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 12px;
          background: #191f28; color: #f2f4f6; font-size: 13.5px; line-height: 1.55; font-weight: 400; letter-spacing: -0.01em;
@@ -121,7 +121,7 @@
   .steps li > div { min-width: 0; }
   .steps li + li { border-top: 1px solid var(--border); }
   .steps .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--seg); color: var(--text-2); }
-  .steps li.now .n { background: var(--accent); color: #fff; }
+  .steps li.now .n { background: var(--accent-strong); color: #fff; }
   .steps li.done .n { background: var(--up-soft); color: var(--up); }
   .steps li.done b { color: var(--text-2); }
   .steps p { color: var(--text-2); font-size: 14px; margin-top: 2px; }
@@ -135,7 +135,7 @@
   .check-note details > summary { display: inline-flex; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--text-2); }
   .check-note ol { margin: 8px 0 0 18px; color: var(--text-2); font-size: 14px; }
   .check-note ol li { margin-top: 4px; }
-  .tl-name .muted { color: var(--muted); font-size: 12.5px; font-weight: 500; margin-left: 6px; }
+  .tl-name .muted { color: var(--muted); font-size: 13.5px; font-weight: 500; margin-left: 6px; }
   .arrow, .display .dl b span.arrow { color: inherit; font-size: .62em; vertical-align: .18em; margin: 0 .12em 0 0; }
 
   /* 자산군 한 줄 막대 */
@@ -209,19 +209,19 @@
   .gauge { position: relative; height: 10px; background: var(--surface-2); border-radius: 5px; margin: 24px 0 6px; }
   .gauge i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
   .gauge .limit { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--text); }
-  .gauge .limit span { position: absolute; bottom: 100%; transform: translateX(-50%); font-size: 12.5px; color: var(--text-2); white-space: nowrap; }
+  .gauge .limit span { position: absolute; bottom: 100%; transform: translateX(-50%); font-size: 13.5px; color: var(--text-2); white-space: nowrap; }
   .change { padding: 14px 0; font-size: 14.5px; }
   .change + .change { border-top: 1px solid var(--border); }
   .change-head { font-weight: 700; margin-bottom: 6px; }
   .change-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .change-label { font-size: 12.5px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
+  .change-label { font-size: 13.5px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
   .change .removed { color: var(--text-2); }
   .change .added { color: var(--accent); }
 
   /* 접히는 영역: 카드 아래 '자세히' 줄 */
   summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   summary::-webkit-details-marker { display: none; }
-  summary::after { content: ""; flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform .2s; }
+  summary::after { content: ""; flex: none; width: 8px; height: 8px; border-right: 2px solid var(--text-2); border-bottom: 2px solid var(--text-2); transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform .2s; }
   details[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
   details.inline { margin-top: 12px; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); }
   details.inline > summary { padding: 16px 24px; font-size: 15px; font-weight: 500; color: var(--text-2); }
@@ -261,45 +261,53 @@
   .step-t { font-size: 20px; font-weight: 700; margin-top: 4px; letter-spacing: -0.02em; line-height: 1.35; }
   .todo .progress { height: 8px; margin-top: 10px; border-radius: 4px; background: var(--seg); overflow: hidden; }
   .todo .progress i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
-  .cta { display: block; width: 100%; margin-top: 14px; font: inherit; font-size: 16px; font-weight: 700; color: #fff; background: var(--accent);
+  .cta { display: block; width: 100%; margin-top: 14px; font: inherit; font-size: 16px; font-weight: 700; color: #fff; background: var(--accent-strong);
          border: 0; border-radius: 14px; padding: 14px 20px; cursor: pointer; }
   .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   @media (min-width: 700px) { .cta { display: inline-block; width: auto; padding: 12px 28px; } }
   .todo #checkHow > summary { display: none; }
   .todo #checkHow ol { margin: 12px 0 0 18px; color: var(--text-2); font-size: 14px; }
   .todo #checkHow li { margin-top: 4px; }
-  .stepdots { list-style: none; display: flex; gap: 6px; margin-top: 18px; font-size: 12.5px; color: var(--muted); }
+  .stepdots { list-style: none; display: flex; gap: 6px; margin-top: 18px; font-size: 13.5px; color: var(--muted); }
   .stepdots li { flex: 1; border-top: 3px solid var(--seg); padding-top: 6px; }
   .stepdots li.done { border-color: var(--up); }
   .stepdots li.now { border-color: var(--accent); color: var(--text); font-weight: 600; }
+  .bignums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .bignums div { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+  .bignums small { display: block; font-size: 13.5px; font-weight: 600; color: var(--text-2); }
+  .bignums b { display: block; margin-top: 2px; font-size: clamp(19px, 5vw, 26px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .bignums .good { color: var(--up); } .bignums .bad { color: var(--down); }
+  .todo .chip { display: inline-block; margin-top: 12px; }
+  @media (max-width: 420px) { .bignums { grid-template-columns: 1fr 1fr; } .bignums div:first-child { grid-column: 1 / -1; } }
   .bench { margin-top: 12px; }
   .bench .ctitle .sub { font-weight: 500; font-size: 13px; margin-left: 4px; }
   .brow { display: grid; grid-template-columns: minmax(0, 1.25fr) 1fr 1fr; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
   .brow.head { border-top: 0; padding: 0 0 4px; font-size: 13px; color: var(--muted); }
   .bname { min-width: 0; font-size: 14.5px; color: var(--text-2); line-height: 1.35; }
-  .bname small { display: block; font-size: 12px; color: var(--muted); }
+  .bname small { display: block; font-size: 13px; color: var(--muted); }
   .brow.me .bname { color: var(--text); font-weight: 700; }
   .bcell { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .bcell b { font-size: 15px; font-weight: 700; white-space: nowrap; }
   .bbar { flex: none; height: 8px; border-radius: 4px; min-width: 2px; }
   .bbar.up { background: var(--gain); } .bbar.down { background: var(--loss); }
-  .brow:not(.me) .bbar { opacity: .4; }
-  .brow:not(.me) .bcell b { font-weight: 500; color: var(--text-2); }
+  .brow.me { background: var(--accent-soft); border-radius: 12px; border-top-color: transparent; margin: 0 -10px; padding: 10px; }
+  .brow.me + .brow { border-top-color: transparent; }
+  .brow.me .bcell b { font-size: 18px; }
+  .bench-more { margin-top: 10px; }
+  .bench-more > summary { justify-content: flex-start; font-size: 14px; font-weight: 600; color: var(--text-2); padding: 6px 0; }
   .verdict { margin-top: 14px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
   .verdict.better { color: var(--up); } .verdict.worse { color: var(--down); }
   .verdict + .sub { margin-top: 2px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-  .chip { background: var(--surface-2); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--text-2); }
+  .chip { background: var(--surface-2); border-radius: 999px; padding: 5px 12px; font-size: 13.5px; color: var(--text); }
   .bench .hint { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--warn-soft); font-size: 14px; }
   section.accs { margin-top: 10px; }
   section.accs:first-of-type { margin-top: 18px; }
   details.acc { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); }
   details.acc > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 18px 22px; cursor: pointer; }
   details.acc > summary::-webkit-details-marker { display: none; }
-  details.acc > summary::after { content: '›'; flex: none; color: var(--muted); font-size: 22px; line-height: 1; transform: rotate(90deg); transition: transform .2s; }
-  details.acc[open] > summary::after { transform: rotate(-90deg); }
   .acc-t { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; flex: none; }
-  .acc-v { margin-left: auto; min-width: 0; text-align: right; color: var(--text-2); font-size: 14.5px; font-weight: 600; }
+  .acc-v { margin-left: auto; min-width: 0; text-align: right; color: var(--text); font-size: 15px; font-weight: 700; }
   .acc-body { padding: 0 14px 16px; }
   .acc-body > .card, .acc-body .grid-2 > .card { box-shadow: none; background: var(--surface-2); }
   .acc-body > .sub { margin: 0 8px 10px; }
@@ -309,10 +317,10 @@
   .steps .progress i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
   .btnrow { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 8px; }
   .btnrow .linkbtn { margin-top: 0; }
-  .pill { font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+  .pill { font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent-strong); border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; }
   .cmdbox { margin-top: 8px; }
   .cmdbox > summary { font-size: 13px; color: var(--muted); cursor: pointer; }
-  .cmdbox code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-size: 12.5px; overflow-wrap: anywhere; }
+  .cmdbox code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-size: 13.5px; overflow-wrap: anywhere; }
   .steps li:not(.now) b { font-weight: 600; color: var(--text-2); }
   .steps li.done b { color: var(--text-2); }
   details.notice > summary { cursor: pointer; font-weight: 600; }
@@ -334,9 +342,9 @@
   .cashlist .bd b { font-size: 15px; }
   .cashlist .bd .sub { display: block; margin-top: 2px; font-size: 13px; overflow-wrap: anywhere; }
   .cashlist .rt { flex: none; text-align: right; font-size: 15px; font-weight: 700; color: var(--accent); }
-  .cashlist .rt small { display: block; font-size: 12.5px; font-weight: 500; color: var(--text-2); }
-  .tag-sb { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 6px; background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 600; vertical-align: 1px; }
-  .cash-src { margin-top: 14px; color: var(--muted); font-size: 12.5px; }
+  .cashlist .rt small { display: block; font-size: 13.5px; font-weight: 500; color: var(--text-2); }
+  .tag-sb { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 6px; background: var(--surface-2); color: var(--text-2); font-size: 13px; font-weight: 600; vertical-align: 1px; }
+  .cash-src { margin-top: 14px; color: var(--muted); font-size: 13.5px; }
   footer { margin: 32px 4px 0; color: var(--muted); font-size: 13px; }
 
   .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 19; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface); color: var(--text-2);
@@ -599,16 +607,19 @@
     }
     var maxC = Math.max.apply(null, B.rows.map(function (r) { return Math.max(r.cagr, 0); }).concat([1]));
     var maxM = Math.max.apply(null, B.rows.map(function (r) { return Math.abs(r.mdd); }).concat([1]));
-    var rows = B.rows.map(function (r) {
+    function brow(r) {
       return '<div class="brow' + (r.key === 'model' ? ' me' : '') + '"><div class="bname">' + esc(r.label) + (r.sub ? '<small>' + esc(r.sub) + '</small>' : '') + '</div>' +
         '<div class="bcell"><span class="bbar up" style="width:' + (Math.max(r.cagr, 0) / maxC * 55) + '%"></span><b class="num">' + plainPct(r.cagr) + '</b></div>' +
         '<div class="bcell"><span class="bbar down" style="width:' + (Math.abs(r.mdd) / maxM * 55) + '%"></span><b class="num">' + (r.mdd ? plainPct(r.mdd) : '0%') + '</b></div></div>';
-    }).join('');
+    }
+    var main = B.rows.filter(function (r) { return r.key === 'model' || r.key === 'fixed'; }), rest = B.rows.filter(function (r) { return main.indexOf(r) < 0; });
     var icon = { better: '✓ ', safer: '', riskier: '', worse: '! ' }[B.verdict.kind];
     box.innerHTML = '<h3 class="ctitle">다른 방법과 비교 · ' + B.years + '년' + q('bench') + '<span class="sub">' + esc(String(B.risk || '')) + (B.exact ? '' : ' 기준') + '</span></h3>' +
-      '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + rows +
-      '<p class="verdict ' + B.verdict.kind + '">' + icon + esc(B.verdict.text) + '</p>' + (B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
-      (B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
+      '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + main.map(brow).join('') +
+      '<p class="verdict ' + B.verdict.kind + '">' + icon + esc(B.verdict.text) + '</p>' +
+      '<details class="bench-more"><summary>자세히 · 주식 전체·예금과 비교</summary>' + rest.map(brow).join('') +
+      (B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
+      (B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
       (B.suggest && !m.isPension ? '<p class="hint">' + esc(B.suggest) + '</p>' : '');
   }
 
@@ -616,8 +627,15 @@
     var box = document.getElementById('todo');
     if (!m.cmd) {   // 일반 탭, 또는 웹 사이트판(주문 기능 없음)
       var uc = m.pension && m.pension.check ? m.pension.check.unconfirmed.length : 0;
-      box.innerHTML = '<p class="step-k">지금 할 일</p><h3 class="step-t">아래 종목을 내 ' + (m.isPension ? '연금계좌' : '증권사 앱') + '에서 직접 주문하세요</h3>' +
-        (uc ? '<p class="sub">연금계좌에서 살 수 있는지 아직 확인하지 않은 종목 ' + uc + '개는 주문 전에 증권사 앱에서 확인하세요.' + q('pcheck') + '</p>' : '') +
+      var f = (m.mc && m.mc.final) || {}, pr = m.mc && m.mc.principalTotal, B = m.isPension ? META.bench : META.benchGeneral;
+      var me = B ? B.rows.filter(function (r) { return r.key === 'model'; })[0] : null, mdd = me ? me.mdd : (m.wf && m.wf.mdd);
+      var fix = B ? B.rows.filter(function (r) { return r.key === 'fixed'; })[0] : null;
+      var nums = [['넣을 돈', won(m.invested), ''],
+                  [(m.mc && m.mc.years || 10) + '년 뒤 보통', f.p50 ? won(f.p50) : '-', f.p50 && pr ? (f.p50 >= pr ? 'good' : 'bad') : ''],
+                  ['최악일 때', mdd != null ? plainPct(mdd) : '-', mdd != null && fix ? (mdd >= fix.mdd ? 'good' : 'bad') : 'bad']];
+      box.innerHTML = '<p class="step-k">지금 할 일</p><h3 class="step-t">' + (m.isPension ? '연금계좌' : '증권사 앱') + '에서 직접 주문</h3>' +
+        '<div class="bignums">' + nums.map(function (n) { return '<div><small>' + n[0] + '</small><b class="' + n[2] + '">' + n[1] + '</b></div>'; }).join('') + '</div>' +
+        (uc ? '<span class="chip">주문 전 확인 필요 <b class="num">' + uc + '개</b>' + q('pcheck') + '</span>' : '') +
         '<button type="button" class="cta" data-go="buy">' + (META.web ? '예시 종목·수량 보기' : '살 종목·수량 보기') + '</button>' +
         (META.web ? '<ol class="stepdots"><li class="now">종목 확인</li><li>증권사 앱에서 주문</li><li>3개월마다 비중 점검</li></ol>' : '');
       return;
@@ -712,7 +730,7 @@
     var bar = document.getElementById('allocBar');
     bar.innerHTML = m.classes.filter(function (c) { return c.pct > 0; }).map(function (c) {
       return '<span style="width:' + c.pct + '%;background:var(' + CLASS_VAR[c.cls] + ')" title="' + c.cls + ' ' + c.pct.toFixed(1) + '%">' +
-        (c.pct >= 9 ? c.cls + ' ' + Math.round(c.pct) + '%' : '') + '</span>';
+        '</span>';
     }).join('');
     bar.setAttribute('aria-label', '자산군 비중: ' + m.classes.map(function (c) { return c.cls + ' ' + c.pct.toFixed(1) + '%'; }).join(', '));
     document.getElementById('allocLegend').innerHTML = m.classes.map(function (c) {
@@ -736,9 +754,9 @@
     });
     document.getElementById('holdings').innerHTML = html;
 
-    // 비중 큰 순서로 상위 5개만 기본으로, 나머지는 '자세히' 안에 (17장)
+    // 비중 큰 순서로 상위 6개만 기본으로, 나머지는 '자세히' 안에 (17장)
     var hs = m.holdings.slice().sort(function (a, b) { return b.pct - a.pct; });
-    var maxP = hs.length ? hs[0].pct : 1, TOP = 5;
+    var maxP = hs.length ? hs[0].pct : 1, TOP = 6;
     var fewUnconfirmed = hs.filter(function (h) { return h.unconfirmed; }).length <= 3;
     function row(h, i) {
       return '<li><span class="tl-rank num">' + (i + 1) + '</span>' +
@@ -1079,7 +1097,7 @@
     var s = m.mc.success, wrap = document.getElementById('goalWrap');
     wrap.hidden = s == null;
     if (s == null) return;
-    var color = s >= 70 ? css('--up') : (s >= 40 ? css('--warn') : css('--down'));
+    var color = s >= 70 ? 'var(--up)' : (s >= 40 ? 'var(--warn)' : 'var(--down)');   // 테마 바꿔도 따라감
     document.getElementById('goalCenter').innerHTML = '<b class="num" style="color:' + color + '">' + plainPct(s, 0) + '</b><span>목표 ' + won(m.mc.target) + ' 도달 확률</span>';
     charts.goal = new Chart(document.getElementById('goalChart'), {
       type: 'doughnut',
@@ -1257,7 +1275,7 @@
   }).join('');
   fillQ(document);
 
-  document.getElementById('footer').textContent = (META.priceDate ? '가격 기준 ' + META.priceDate + ' · ' : '') + META.generated + ' 생성 · KRX·Yahoo Finance 자료로 계산한 결과 · 교육용 시뮬레이션';
+  document.getElementById('footer').textContent = (META.priceDate ? '가격 기준 ' + META.priceDate + ' · ' : '') + (META.generated ? META.generated + ' 생성 · ' : '') + 'KRX·Yahoo Finance 자료로 계산한 결과 · 교육용 시뮬레이션';
   // 창 크기가 바뀌면 차트도 다시 맞춤 (일부 환경에서 Chart.js 자동 맞춤이 늦게 반영돼 가로로 넘치는 것 방지)
   var resizeTimer = null;
   window.addEventListener('resize', function () {
