@@ -287,8 +287,8 @@
   .bname small { display: block; font-size: 13px; color: var(--muted); }
   .brow.me .bname { color: var(--text); font-weight: 700; }
   .bcell { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .bcell b { font-size: 15px; font-weight: 700; white-space: nowrap; }
-  .bbar { flex: none; height: 8px; border-radius: 4px; min-width: 2px; }
+  .bcell b { flex: none; margin-left: auto; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .bbar { flex: 0 1 auto; height: 8px; border-radius: 4px; min-width: 2px; }
   .bbar.up { background: var(--gain); } .bbar.down { background: var(--loss); }
   .brow.me { background: var(--accent-soft); border-radius: 12px; border-top-color: transparent; margin: 0 -10px; padding: 10px; }
   .brow.me + .brow { border-top-color: transparent; }
@@ -608,16 +608,19 @@
     }
     var maxC = Math.max.apply(null, B.rows.map(function (r) { return Math.max(r.cagr, 0); }).concat([1]));
     var maxM = Math.max.apply(null, B.rows.map(function (r) { return Math.abs(r.mdd); }).concat([1]));
+    if (B.rows[1] && B.rows[1].sub) HELP.fixedmix = [B.rows[1].label, B.rows[1].sub + '. 비율은 분기마다 그때까지의 자료로만, 이 모델과 흔들림이 같도록 정했습니다.'];
     function brow(r) {
-      return '<div class="brow' + (r.key === 'model' ? ' me' : '') + '"><div class="bname">' + esc(r.label) + (r.sub ? '<small>' + esc(r.sub) + '</small>' : '') + '</div>' +
+      var tip = r.key === 'fixed' && HELP.fixedmix;
+      return '<div class="brow' + (r.key === 'model' ? ' me' : '') + '"><div class="bname">' + esc(r.label) + (tip ? q('fixedmix') : r.sub ? '<small>' + esc(r.sub) + '</small>' : '') + '</div>' +
         '<div class="bcell"><span class="bbar up" style="width:' + (Math.max(r.cagr, 0) / maxC * 55) + '%"></span><b class="num">' + plainPct(r.cagr) + '</b></div>' +
         '<div class="bcell"><span class="bbar down" style="width:' + (Math.abs(r.mdd) / maxM * 55) + '%"></span><b class="num">' + (r.mdd ? plainPct(r.mdd) : '0%') + '</b></div></div>';
     }
     var main = B.rows.filter(function (r) { return r.key === 'model' || r.key === 'fixed'; }), rest = B.rows.filter(function (r) { return main.indexOf(r) < 0; });
-    var icon = { better: '✓ ', safer: '', riskier: '', worse: '! ' }[B.verdict.kind];
+    var short = { better: '수익은 높고 하락은 작았어요', safer: '수익은 낮지만 하락은 작았어요',
+                  riskier: '수익은 높지만 하락은 컸어요', worse: '수익은 낮고 하락은 컸어요' }[B.verdict.kind] || B.verdict.text;
     box.innerHTML = '<h3 class="ctitle">다른 방법과 비교 · ' + B.years + '년' + q('bench') + '<span class="sub">' + esc(String(B.risk || '')) + (B.exact ? '' : ' 기준') + '</span></h3>' +
       '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + main.map(brow).join('') +
-      '<p class="verdict ' + B.verdict.kind + '">' + icon + esc(B.verdict.text) + '</p>' +
+      '<p class="verdict ' + B.verdict.kind + '">' + esc(short) + '</p>' +
       '<details class="bench-more"><summary>자세히 · 주식 전체·예금과 비교</summary>' + rest.map(brow).join('') +
       (B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
       (B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
