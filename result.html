@@ -577,6 +577,7 @@
     taxcredit: ['세액공제 환급', '연금계좌에 넣은 돈의 일부(13.2% 또는 16.5%)를 연말정산 때 세금에서 돌려받습니다.'],
     hedge: ['환노출 / 환헤지(H)', '환노출 ETF는 원·달러 환율에 따라 원화 가치가 바뀝니다. 이름에 (H)가 붙은 ETF는 환율 영향을 줄인 상품입니다.'],
     accounts: ['어느 탭을 보면 되나요', '회사 퇴직연금(DC)·개인 IRP는 IRP·DC, 연금저축펀드·연금저축계좌는 연금저축, 그 밖의 일반 증권 계좌는 일반 탭입니다.'],
+    mctrend: ['추세 필터 전 구성 기준', '지금은 하락 추세라 위험자산 절반을 채권으로 옮긴 구성입니다. 추세가 바뀌면 구성도 다시 바뀌므로, 앞으로 수십 년 예측은 이 임시 방어 구성이 아니라 추세 필터를 적용하기 전 구성(핵심+위성)으로 계산했습니다.'],
     coresat: ['핵심+위성 · 추세 필터', '13년 검증(앞 구간에서 고르고 최근 5년으로 확인)으로 채택한 규칙입니다. 전체의 절반은 모델과 흔들림이 같은 단순 고정(국내 대표 주식 + 국고채3년, 일반 계좌는 전 세계 주식 VT + 국고채3년), 나머지 절반은 모델이 고른 ETF입니다. 위험자산 묶음이 최근 10개월 평균보다 낮으면 위험자산 몫의 절반을 채권으로 옮깁니다.'],
     bench: ['다른 방법과 비교', '같은 13년 동안 ① 이 모델 ② 모델과 흔들림(변동성)이 같도록 주식·채권 ETF 두 개만 고정 비율로 산 경우 ③ 주식 시장 전체 ETF 하나만 산 경우 ④ 예금(연 3% 가정)을 비교했습니다. 분배금 포함이고, 단순 고정의 비율은 분기마다 그때까지의 자료로만 정했습니다. 이 모델에는 핵심+위성·추세 필터 규칙(21장)이 들어 있습니다.'],
     cashplan: ['남는 현금 어디에 둘까', '금융감독원 \'금융상품 한눈에\'에 공시된 정기예금·적금 가운데 누구나 가입할 수 있는 상품을 기본 금리 순으로 보여 줍니다. 회사마다 1개씩만 골랐습니다. 가입 전 금융회사에서 금리와 조건을 꼭 다시 확인하세요.'],
@@ -802,7 +803,8 @@
   function renderFuture(m) {
     var mc = m.mc, f = mc.final || {};
     document.getElementById('futureTitle').textContent = '앞으로 ' + (mc.years || 10) + '년';
-    document.getElementById('futureSub').innerHTML = '5,000번 계산' + q('mc') + ' · 세금 떼기 전';
+    document.getElementById('futureSub').innerHTML = '5,000번 계산' + q('mc') + ' · 세금 떼기 전' +
+      (m.rules && m.rules.trend_down ? ' · 추세 필터 전 구성 기준' + q('mctrend') : '');
     var pr = mc.chart && mc.chart.principal ? mc.chart.principal[mc.chart.principal.length - 1] : null;
     document.getElementById('futureNums').innerHTML =
       '<div class="fnum"><div class="label">좋을 때' + q('range') + '</div><div class="value num">' + won(f.p90) + '</div></div>' +
