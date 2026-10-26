@@ -1,13 +1,13 @@
 {
- "generated": "2026-10-26",
- "priceDate": "2026-10-23",
+ "generated": "2026-10-27",
+ "priceDate": "2026-10-26",
  "profiles": [
   {
    "key": "very_conservative",
    "label": "최저위험형",
    "desc": "채권 위주 · 원금 지키기",
    "pension": {
-    "cagr": 3.0,
+    "cagr": 3.01,
     "mdd": -6.02
    },
    "general": {
@@ -20,12 +20,12 @@
    "label": "저위험형",
    "desc": "채권 절반 · 조금씩 불리기",
    "pension": {
-    "cagr": 4.35,
+    "cagr": 4.36,
     "mdd": -11.11
    },
    "general": {
-    "cagr": 4.45,
-    "mdd": -11.71
+    "cagr": 4.44,
+    "mdd": -11.7
    }
   },
   {
@@ -33,12 +33,12 @@
    "label": "중위험형",
    "desc": "주식·채권 균형",
    "pension": {
-    "cagr": 7.44,
-    "mdd": -19.11
+    "cagr": 7.45,
+    "mdd": -19.12
    },
    "general": {
-    "cagr": 6.66,
-    "mdd": -17.68
+    "cagr": 6.52,
+    "mdd": -17.69
    }
   },
   {
@@ -47,10 +47,10 @@
    "desc": "주식 위주",
    "pension": {
     "cagr": 8.2,
-    "mdd": -20.76
+    "mdd": -20.77
    },
    "general": {
-    "cagr": 7.83,
+    "cagr": 7.72,
     "mdd": -19.21
    }
   },
@@ -59,12 +59,12 @@
    "label": "최고위험형",
    "desc": "주식 최대",
    "pension": {
-    "cagr": 8.53,
-    "mdd": -20.76
+    "cagr": 8.54,
+    "mdd": -20.77
    },
    "general": {
-    "cagr": 9.08,
-    "mdd": -20.91
+    "cagr": 8.93,
+    "mdd": -20.92
    }
   }
  ]

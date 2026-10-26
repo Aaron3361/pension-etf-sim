@@ -294,6 +294,8 @@
   .brow.me + .brow { border-top-color: transparent; }
   .brow.me .bcell b { font-size: 18px; }
   .bench-more { margin-top: 10px; }
+  .bench .long-tabs { margin: 0 0 8px; }
+  .bench .period-note { margin: -2px 0 6px; font-size: 13.5px; }
   .bench-more > summary { justify-content: flex-start; font-size: 14px; font-weight: 600; color: var(--text-2); padding: 6px 0; }
   .verdict { margin-top: 14px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
   .verdict.better { color: var(--up); } .verdict.worse { color: var(--down); }
@@ -587,6 +589,7 @@
     accounts: ['어느 탭을 보면 되나요', '회사 퇴직연금(DC)·개인 IRP는 IRP·DC, 연금저축펀드·연금저축계좌는 연금저축, 그 밖의 일반 증권 계좌는 일반 탭입니다.'],
     mctrend: ['추세 필터 전 구성 기준', '지금은 하락 추세라 위험자산 절반을 채권으로 옮긴 구성입니다. 추세가 바뀌면 구성도 다시 바뀌므로, 앞으로 수십 년 예측은 이 임시 방어 구성이 아니라 추세 필터를 적용하기 전 구성(핵심+위성)으로 계산했습니다.'],
     coresat: ['핵심+위성 · 추세 필터', '13년 검증(앞 구간에서 고르고 최근 5년으로 확인)으로 채택한 규칙입니다. 전체의 절반은 모델과 흔들림이 같은 단순 고정(국내 대표 주식 + 국고채3년, 일반 계좌는 전 세계 주식 VT + 국고채3년), 나머지 절반은 모델이 고른 ETF입니다. 위험자산 묶음이 최근 10개월 평균보다 낮으면 위험자산 몫의 절반을 채권으로 옮깁니다.'],
+    benchrecent: ['최근 5년 (고를 때 안 본 기간)', '핵심+위성·추세 필터 규칙(21장)은 2013년~2021년 10월 자료만 보고 골랐습니다. 그 뒤 약 5년은 고를 때 쓰지 않았으므로, 이 기간 성적이 규칙의 실제 실력에 더 가깝습니다. 13년 전체 숫자는 고른 기간이 들어 있어 조금 낙관적일 수 있습니다.'],
     bench: ['다른 방법과 비교', '같은 13년 동안 ① 이 모델 ② 모델과 흔들림(변동성)이 같도록 주식·채권 ETF 두 개만 고정 비율로 산 경우 ③ 주식 시장 전체 ETF 하나만 산 경우 ④ 예금(연 3% 가정)을 비교했습니다. 분배금 포함이고, 단순 고정의 비율은 분기마다 그때까지의 자료로만 정했습니다. 이 모델에는 핵심+위성·추세 필터 규칙(21장)이 들어 있습니다.'],
     cashplan: ['남는 현금 어디에 둘까', '금융감독원 \'금융상품 한눈에\'에 공시된 정기예금·적금 가운데 누구나 가입할 수 있는 상품을 기본 금리 순으로 보여 줍니다. 회사마다 1개씩만 골랐습니다. 가입 전 금융회사에서 금리와 조건을 꼭 다시 확인하세요.'],
     prefrate: ['기본 금리 · 최고 금리', '기본 금리는 조건 없이 받는 금리입니다. 최고 금리는 급여 이체·카드 실적 같은 우대 조건을 모두 채웠을 때만 받으므로 순위에는 기본 금리만 썼습니다.'],
@@ -608,6 +611,16 @@
 
   function longFor(m) { return m.isPension ? META.long : META.longGeneral; }   // 연금 탭 = 국내 13년, 일반 탭 = 국내+해외 13년
 
+  var benchPeriod = 'recent';
+  try { benchPeriod = localStorage.getItem('bench-period') || 'recent'; } catch (e) {}
+  document.addEventListener('click', function (e) {   // 비교 기간 바꾸기
+    var b = e.target.closest && e.target.closest('[data-period]');
+    if (!b) return;
+    benchPeriod = b.dataset.period;
+    try { localStorage.setItem('bench-period', benchPeriod); } catch (e2) {}
+    var cur = byKey[current];
+    if (cur) renderHero(cur);
+  });
   function renderHero(m) {   // 다른 방법과 비교 (18장): 이 모델 · 같은 흔들림 단순 고정 · 주식 전체 · 예금
     document.getElementById('heroEyebrow').innerHTML = '<b>' + esc(m.short) + ' 계좌</b> · ETF ' + m.count + '개';
     var B = m.isPension ? META.bench : META.benchGeneral, box = document.getElementById('bench');
@@ -616,8 +629,10 @@
         '<div class="chips"><span class="chip">연평균 ' + arrowPct(m.wf.cagr) + '</span><span class="chip">최대 하락 ' + arrowPct(m.wf.mdd) + '</span></div>';
       return;
     }
-    var maxC = Math.max.apply(null, B.rows.map(function (r) { return Math.max(r.cagr, 0); }).concat([1]));
-    var maxM = Math.max.apply(null, B.rows.map(function (r) { return Math.abs(r.mdd); }).concat([1]));
+    // 23-1: [최근 5년 | 13년] — 최근 5년(규칙을 고를 때 안 본 기간)이 기본
+    var recentOn = benchPeriod === 'recent' && B.recent, P = recentOn ? B.recent : B;
+    var maxC = Math.max.apply(null, P.rows.map(function (r) { return Math.max(r.cagr, 0); }).concat([1]));
+    var maxM = Math.max.apply(null, P.rows.map(function (r) { return Math.abs(r.mdd); }).concat([1]));
     if (B.rows[1] && B.rows[1].sub) HELP.fixedmix = [B.rows[1].label, B.rows[1].sub + '. 비율은 분기마다 그때까지의 자료로만, 이 모델과 흔들림이 같도록 정했습니다.'];
     function brow(r) {
       var tip = r.key === 'fixed' && HELP.fixedmix;
@@ -625,19 +640,23 @@
         '<div class="bcell"><span class="bbar up" style="width:' + (Math.max(r.cagr, 0) / maxC * 55) + '%"></span><b class="num">' + plainPct(r.cagr) + '</b></div>' +
         '<div class="bcell"><span class="bbar down" style="width:' + (Math.abs(r.mdd) / maxM * 55) + '%"></span><b class="num">' + (r.mdd ? plainPct(r.mdd) : '0%') + '</b></div></div>';
     }
-    var main = B.rows.filter(function (r) { return r.key === 'model' || r.key === 'fixed'; }), rest = B.rows.filter(function (r) { return main.indexOf(r) < 0; });
+    var main = P.rows.filter(function (r) { return r.key === 'model' || r.key === 'fixed'; }), rest = P.rows.filter(function (r) { return main.indexOf(r) < 0; });
     // 판정: 이 모델 vs 단순 고정. 연평균 0.2%p · 최대 하락 0.5%p 안의 차이는 '비슷'
     var me = main[0], fx = main[1], dc = me && fx ? me.cagr - fx.cagr : 0, dm = me && fx ? me.mdd - fx.mdd : 0;
     var sc = Math.abs(dc) < 0.2 ? 0 : (dc > 0 ? 1 : -1), sm = Math.abs(dm) < 0.5 ? 0 : (dm > 0 ? 1 : -1);
     var short = sc === 0 && sm === 0 ? '수익도 하락도 비슷했어요'
       : '수익은 ' + ['낮고', '비슷하고', '높고'][sc + 1] + ' 하락은 ' + ['컸어요', '비슷했어요', '작았어요'][sm + 1];
     var kind = sc >= 0 && sm >= 0 ? (sc + sm > 0 ? 'better' : 'similar') : (sc <= 0 && sm <= 0 ? 'worse' : 'mixed');
-    box.innerHTML = '<h3 class="ctitle">다른 방법과 비교 · ' + B.years + '년' + q('bench') + '<span class="sub">' + esc(String(B.risk || '')) + (B.exact ? '' : ' 기준') + '</span></h3>' +
+    var seg = B.recent ? '<div class="long-tabs" role="group" aria-label="비교 기간">' +
+      '<button type="button" data-period="recent" aria-pressed="' + !!recentOn + '">최근 ' + B.recent.years + '년</button>' +
+      '<button type="button" data-period="all" aria-pressed="' + !recentOn + '">' + B.years + '년</button></div>' : '';
+    box.innerHTML = '<h3 class="ctitle">다른 방법과 비교' + q(recentOn ? 'benchrecent' : 'bench') + '<span class="sub">' + esc(String(B.risk || '')) + (B.exact ? '' : ' 기준') + '</span></h3>' + seg +
+      (recentOn ? '<p class="sub period-note">' + esc(String(B.recent.start).slice(0, 7)) + ' ~ ' + esc(String(B.recent.end).slice(0, 7)) + ' · 규칙을 고를 때 안 본 기간</p>' : '') +
       '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + main.map(brow).join('') +
       '<p class="verdict ' + kind + '">' + esc(short) + '</p>' +
       '<details class="bench-more"><summary>자세히 · 주식 전체·예금과 비교</summary>' + rest.map(brow).join('') +
-      (B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
-      (B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
+      (!recentOn && B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
+      (!recentOn && B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
       (B.suggest && !m.isPension ? '<p class="hint">' + esc(B.suggest) + '</p>' : '');
   }
 
