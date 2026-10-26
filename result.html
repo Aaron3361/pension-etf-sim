@@ -577,7 +577,8 @@
     taxcredit: ['세액공제 환급', '연금계좌에 넣은 돈의 일부(13.2% 또는 16.5%)를 연말정산 때 세금에서 돌려받습니다.'],
     hedge: ['환노출 / 환헤지(H)', '환노출 ETF는 원·달러 환율에 따라 원화 가치가 바뀝니다. 이름에 (H)가 붙은 ETF는 환율 영향을 줄인 상품입니다.'],
     accounts: ['어느 탭을 보면 되나요', '회사 퇴직연금(DC)·개인 IRP는 IRP·DC, 연금저축펀드·연금저축계좌는 연금저축, 그 밖의 일반 증권 계좌는 일반 탭입니다.'],
-    bench: ['다른 방법과 비교', '같은 13년 동안 ① 이 모델 ② 모델과 흔들림(변동성)이 같도록 주식·채권 ETF 두 개만 고정 비율로 산 경우 ③ 주식 시장 전체 ETF 하나만 산 경우 ④ 예금(연 3% 가정)을 비교했습니다. 분배금 포함이고, 단순 고정의 비율은 분기마다 그때까지의 자료로만 정했습니다.'],
+    coresat: ['핵심+위성 · 추세 필터', '13년 검증(앞 구간에서 고르고 최근 5년으로 확인)으로 채택한 규칙입니다. 전체의 절반은 모델과 흔들림이 같은 단순 고정(국내 대표 주식 + 국고채3년, 일반 계좌는 전 세계 주식 VT + 국고채3년), 나머지 절반은 모델이 고른 ETF입니다. 위험자산 묶음이 최근 10개월 평균보다 낮으면 위험자산 몫의 절반을 채권으로 옮깁니다.'],
+    bench: ['다른 방법과 비교', '같은 13년 동안 ① 이 모델 ② 모델과 흔들림(변동성)이 같도록 주식·채권 ETF 두 개만 고정 비율로 산 경우 ③ 주식 시장 전체 ETF 하나만 산 경우 ④ 예금(연 3% 가정)을 비교했습니다. 분배금 포함이고, 단순 고정의 비율은 분기마다 그때까지의 자료로만 정했습니다. 이 모델에는 핵심+위성·추세 필터 규칙(21장)이 들어 있습니다.'],
     cashplan: ['남는 현금 어디에 둘까', '금융감독원 \'금융상품 한눈에\'에 공시된 정기예금·적금 가운데 누구나 가입할 수 있는 상품을 기본 금리 순으로 보여 줍니다. 회사마다 1개씩만 골랐습니다. 가입 전 금융회사에서 금리와 조건을 꼭 다시 확인하세요.'],
     prefrate: ['기본 금리 · 최고 금리', '기본 금리는 조건 없이 받는 금리입니다. 최고 금리는 급여 이체·카드 실적 같은 우대 조건을 모두 채웠을 때만 받으므로 순위에는 기본 금리만 썼습니다.'],
     netint: ['세후 이자', '이자에서 이자소득세 15.4%(소득세 14% + 지방소득세 1.4%)를 뗀 금액입니다. 만기까지 맡겼을 때 기준입니다.'],
@@ -616,11 +617,15 @@
         '<div class="bcell"><span class="bbar down" style="width:' + (Math.abs(r.mdd) / maxM * 55) + '%"></span><b class="num">' + (r.mdd ? plainPct(r.mdd) : '0%') + '</b></div></div>';
     }
     var main = B.rows.filter(function (r) { return r.key === 'model' || r.key === 'fixed'; }), rest = B.rows.filter(function (r) { return main.indexOf(r) < 0; });
-    var short = { better: '수익은 높고 하락은 작았어요', safer: '수익은 낮지만 하락은 작았어요',
-                  riskier: '수익은 높지만 하락은 컸어요', worse: '수익은 낮고 하락은 컸어요' }[B.verdict.kind] || B.verdict.text;
+    // 판정: 이 모델 vs 단순 고정. 연평균 0.2%p · 최대 하락 0.5%p 안의 차이는 '비슷'
+    var me = main[0], fx = main[1], dc = me && fx ? me.cagr - fx.cagr : 0, dm = me && fx ? me.mdd - fx.mdd : 0;
+    var sc = Math.abs(dc) < 0.2 ? 0 : (dc > 0 ? 1 : -1), sm = Math.abs(dm) < 0.5 ? 0 : (dm > 0 ? 1 : -1);
+    var short = sc === 0 && sm === 0 ? '수익도 하락도 비슷했어요'
+      : '수익은 ' + ['낮고', '비슷하고', '높고'][sc + 1] + ' 하락은 ' + ['컸어요', '비슷했어요', '작았어요'][sm + 1];
+    var kind = sc >= 0 && sm >= 0 ? (sc + sm > 0 ? 'better' : 'similar') : (sc <= 0 && sm <= 0 ? 'worse' : 'mixed');
     box.innerHTML = '<h3 class="ctitle">다른 방법과 비교 · ' + B.years + '년' + q('bench') + '<span class="sub">' + esc(String(B.risk || '')) + (B.exact ? '' : ' 기준') + '</span></h3>' +
       '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + main.map(brow).join('') +
-      '<p class="verdict ' + B.verdict.kind + '">' + esc(short) + '</p>' +
+      '<p class="verdict ' + kind + '">' + esc(short) + '</p>' +
       '<details class="bench-more"><summary>자세히 · 주식 전체·예금과 비교</summary>' + rest.map(brow).join('') +
       (B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
       (B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
@@ -636,7 +641,7 @@
       var fix = B ? B.rows.filter(function (r) { return r.key === 'fixed'; })[0] : null;
       var nums = [['넣을 돈', won(m.invested), ''],
                   [(m.mc && m.mc.years || 10) + '년 뒤 보통', f.p50 ? won(f.p50) : '-', f.p50 && pr ? (f.p50 >= pr ? 'good' : 'bad') : ''],
-                  ['최악일 때', mdd != null ? plainPct(mdd) : '-', mdd != null && fix ? (mdd >= fix.mdd ? 'good' : 'bad') : 'bad']];
+                  ['최악일 때', mdd != null ? plainPct(mdd) : '-', mdd != null && fix ? (mdd >= fix.mdd - 0.5 ? 'good' : 'bad') : 'bad']];
       box.innerHTML = '<p class="step-k">지금 할 일</p><h3 class="step-t">' + (m.isPension ? '연금계좌' : '증권사 앱') + '에서 직접 주문</h3>' +
         '<div class="bignums">' + nums.map(function (n) { return '<div><small>' + n[0] + '</small><b class="' + n[2] + '">' + n[1] + '</b></div>'; }).join('') + '</div>' +
         (uc ? '<span class="chip">주문 전 확인 필요 <b class="num">' + uc + '개</b>' + q('pcheck') + '</span>' : '') +
@@ -730,7 +735,9 @@
 
   function renderHoldings(m) {
     var moveText = Object.keys(m.moves || {}).map(function (k) { return k + ' 후보가 없어 ' + k + ' 비중을 ' + m.moves[k] + '(으)로 배분'; }).join(' · ');
-    document.getElementById('buySub').textContent = moveText ? moveText + '했습니다.' : '';
+    var R = m.rules, ruleText = R && R.core ? '절반은 단순 고정(' + esc(R.core_tickers[0].replace('.KS', '') === '069500' ? 'KODEX 200' : R.core_tickers[0]) + ' ' +
+      Math.round(R.core_stock_share * 100) + '% + 국고채3년)' + q('coresat') + ' · 추세 ' + (R.trend_down ? '<b class="v-down">하락 → 위험자산 절반을 채권으로</b>' : '상승') : '';
+    document.getElementById('buySub').innerHTML = [ruleText, moveText ? esc(moveText) + '했습니다.' : ''].filter(Boolean).join('<br>');
     var bar = document.getElementById('allocBar');
     bar.innerHTML = m.classes.filter(function (c) { return c.pct > 0; }).map(function (c) {
       return '<span style="width:' + c.pct + '%;background:var(' + CLASS_VAR[c.cls] + ')" title="' + c.cls + ' ' + c.pct.toFixed(1) + '%">' +
