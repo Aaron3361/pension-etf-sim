@@ -7,7 +7,7 @@
    "label": "최저위험형",
    "desc": "채권 위주 · 원금 지키기",
    "pension": {
-    "cagr": 3.04,
+    "cagr": 3.0,
     "mdd": -6.02
    },
    "general": {
@@ -20,8 +20,8 @@
    "label": "저위험형",
    "desc": "채권 절반 · 조금씩 불리기",
    "pension": {
-    "cagr": 4.36,
-    "mdd": -9.91
+    "cagr": 4.35,
+    "mdd": -11.11
    },
    "general": {
     "cagr": 4.45,
@@ -33,8 +33,8 @@
    "label": "중위험형",
    "desc": "주식·채권 균형",
    "pension": {
-    "cagr": 7.39,
-    "mdd": -17.88
+    "cagr": 7.44,
+    "mdd": -19.11
    },
    "general": {
     "cagr": 6.66,
@@ -46,8 +46,8 @@
    "label": "고위험형",
    "desc": "주식 위주",
    "pension": {
-    "cagr": 8.13,
-    "mdd": -18.81
+    "cagr": 8.2,
+    "mdd": -20.76
    },
    "general": {
     "cagr": 7.83,
@@ -59,8 +59,8 @@
    "label": "최고위험형",
    "desc": "주식 최대",
    "pension": {
-    "cagr": 8.5,
-    "mdd": -18.91
+    "cagr": 8.53,
+    "mdd": -20.76
    },
    "general": {
     "cagr": 9.08,

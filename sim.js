@@ -66,10 +66,44 @@
     var bought = rows.filter(function (r) { return r.qty > 0; }).map(function (r) {
       var amount = Math.floor(r.qty * r.price);
       return { cls: r.cls, name: r.name, ticker: r.ticker, qty: r.qty, amount: amount, pct: amount / capital * 100,
-               domestic: r.domestic, unconfirmed: r.unconfirmed, price: r.price, w: r.w };
+               domestic: r.domestic, unconfirmed: r.unconfirmed, review: r.review, price: r.price, w: r.w };
     });
     var invested = bought.reduce(function (a, r) { return a + r.amount; }, 0);
     return { holdings: bought, invested: invested, cash: capital - invested, dropped: rows.length - bought.length };
+  }
+
+  // ── 매달 적립금으로 살 것 (dashboard.monthly_plan과 같은 규칙, 22-2) ──
+  // 처음 계획대로 샀다고 가정, 가격은 그대로. 매달 (적립금 + 남은 돈)으로 '목표 − 보유'가 가장 큰 3종목을 골라
+  // 그 안에서 덜 담긴 것부터 1주씩, 돈이 1주 가격보다 적어질 때까지 (팔지 않음. 조금 넘친 비중은 다음 달 다른 종목으로 맞춰짐)
+  var MONTHLY_PICKS = 3;   // 한 달에 주문할 종목 수 (주문 번거로움 줄이기)
+  function monthlyPlan(items, capital, monthly, cash, riskCap, months) {
+    var rows = items.filter(function (h) { return h.price > 0 && h.w > 0; }).map(function (h) {
+      return { ticker: h.ticker, name: h.name, cls: h.cls, price: h.price, w: h.w, qty: h.qty || 0 }; });
+    var out = [];
+    if (!(monthly > 0) || !rows.length) return out;
+    for (var k = 1; k <= (months || 3); k++) {
+      cash += monthly;
+      var base = capital + monthly * k, buys = {};
+      var pick = rows.map(function (r, i) { return [r.w * base - r.qty * r.price, i]; })
+        .sort(function (a, b) { return b[0] - a[0] || a[1] - b[1]; }).slice(0, MONTHLY_PICKS).map(function (x) { return x[1]; });
+      for (;;) {
+        var riskyHeld = rows.reduce(function (a, r) { return a + (RISKY.indexOf(r.cls) >= 0 ? r.qty * r.price : 0); }, 0);
+        var best = -1, bestScore = -Infinity;
+        rows.forEach(function (r, i) {
+          if (pick.indexOf(i) < 0) return;
+          var gap = r.w * base - r.qty * r.price;
+          var ok = r.price <= cash && (!riskCap || RISKY.indexOf(r.cls) < 0 || riskyHeld + r.price <= riskCap * base);
+          if (ok && gap > bestScore) { bestScore = gap; best = i; }   // 고른 3종목 안에서 가장 덜 담긴 것부터, 돈이 남지 않게
+        });
+        if (best < 0) break;
+        rows[best].qty += 1; cash -= rows[best].price;
+        buys[rows[best].ticker] = (buys[rows[best].ticker] || 0) + 1;
+      }
+      out.push({ month: k, deposit: monthly, buys: rows.filter(function (r) { return buys[r.ticker]; }).map(function (r) {
+        return { ticker: r.ticker, name: r.name, cls: r.cls, qty: buys[r.ticker], amount: Math.floor(buys[r.ticker] * r.price) }; }),
+        left: Math.floor(cash) });
+    }
+    return out;
   }
 
   // ── 목표 금액 기본값 (monte_carlo.default_target) ──
@@ -207,10 +241,16 @@
                             depositLimit: cons.depositLimit, taxRate: cons.taxLimit ? SIM_TAX_RATE : 0, taxLimit: cons.taxLimit || 0 });
       m.mc = mc;
       if (m.pension) {
-        var unc = a.holdings.filter(function (h) { return h.unconfirmed; }).map(function (h) { return h.ticker; });
-        if (m.pension.check) Object.assign(m.pension.check, { total: a.holdings.length, confirmed: a.holdings.length - unc.length, unconfirmed: unc });
+        var tk = function (f) { return a.holdings.filter(f).map(function (h) { return h.ticker; }); };
+        var unc = tk(function (h) { return h.unconfirmed; });
+        if (m.pension.check) Object.assign(m.pension.check, { total: a.holdings.length, confirmed: a.holdings.length - unc.length, unconfirmed: unc,
+          review: tk(function (h) { return h.review; }), auto: tk(function (h) { return h.unconfirmed && !h.review; }) });
         m.pension.tax = taxCredit(cons.taxLimit || 0, inp.monthly, mc);
       }
+      var qtyOf = {}; a.holdings.forEach(function (h) { qtyOf[h.ticker] = h.qty; });
+      var perMonth = cons.depositLimit ? Math.min(inp.monthly, Math.floor(cons.depositLimit / 12)) : inp.monthly;
+      m.monthlyPlan = monthlyPlan(t.holdings.map(function (h) { return Object.assign({}, h, { qty: qtyOf[h.ticker] || 0 }); }),
+                                  inp.capital, perMonth, a.cash, t.riskCap, 3);
       var blocked = 0;   // 웹판은 주문 차단이 없으므로 '막힌 돈' 항목 없음
       m.cashPlan = cashPlan(t.key, a.cash, blocked, inp.monthly, data.deposits || null);
       if (m.compare) {
@@ -227,6 +267,6 @@
   }
 
   var api = { allocate: allocate, monteCarlo: monteCarlo, defaultTarget: defaultTarget, taxCredit: taxCredit,
-              cashPlan: cashPlan, interest: interest, build: build, buildMeta: buildMeta, buildMode: buildMode };
+              cashPlan: cashPlan, interest: interest, build: build, buildMeta: buildMeta, buildMode: buildMode, monthlyPlan: monthlyPlan };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SIM = api;
 })(this);

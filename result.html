@@ -443,6 +443,12 @@
       </div></details>
     </div></details>
   </section>
+  <section id="sec-monthly" class="accs" hidden aria-label="매달 살 것">
+    <details class="acc" data-acc="monthly"><summary><span class="acc-t">매달 살 것</span><span class="acc-v" id="accMonthly"></span></summary><div class="acc-body">
+      <p class="sub" id="monthlySub"></p>
+      <div class="card" id="monthlyCard"></div>
+    </div></details>
+  </section>
   <section id="sec-cash" class="accs" hidden aria-label="남는 현금">
     <details class="acc" data-acc="cash"><summary><span class="acc-t">남는 현금</span><span class="acc-v" id="accCash"></span></summary><div class="acc-body">
       <div class="card cashcard" id="cashCard" hidden></div>
@@ -568,7 +574,9 @@
     pretax: ['세전', '세금을 떼기 전 금액입니다. 연금으로 받으면 연금소득세(3.3~5.5%), 중도에 일반 인출하면 기타소득세(16.5%)가 붙을 수 있어 실제로 받는 돈은 이보다 적습니다.'],
     aftertax: ['세금 뗀 대략 금액', '연금으로 나눠 받을 때의 연금소득세 3.3~5.5%를 전체 금액에 그대로 곱한 대략값입니다. 실제 세금은 받는 나이·금액·방법에 따라 다릅니다.'],
     below: ['원금보다 적을 확률', '5,000번 계산 가운데 만기 금액이 그동안 넣은 원금(기초자금 + 적립액)보다 적게 끝난 비율입니다.'],
-    pcheck: ['연금 편입 확인', '연금계좌에서는 일부 ETF(합성·파생형 등)를 살 수 없거나 위험자산으로 분류될 수 있습니다. 증권사에서 살 수 있는지 확인해 표에 O/X로 적어야 그 종목의 매수 주문이 열립니다.'],
+    pcheck: ['연금 편입 확인', '연금계좌에서는 일부 ETF(합성·파생형 등)를 살 수 없거나 위험자산으로 분류될 수 있습니다. 증권사 앱에서 연금계좌로 그 ETF를 살 수 있는지 확인하세요. (내 컴퓨터 프로그램은 표에 O를 적은 종목만 주문합니다.)'],
+    monthly: ['매달 살 것', '매달 넣는 돈으로, 목표 비중보다 덜 담긴 종목을 1주씩 삽니다. 팔지 않고 비중을 맞추므로 매매 비용이 적고, 일반 계좌에서는 팔 때 생기는 세금도 피합니다. 처음 계획대로 샀고 가격은 그대로라고 가정한 예시이니, 실제로는 증권사 앱의 보유 비중을 보고 덜 담긴 종목부터 사세요. 연금 계좌는 연 납입 한도(1,800만원) 안에서만 계산합니다.'],
+    pauto: ['규정상 가능 (자동 판정)', '규정 기준으로 연금계좌에서 살 수 있을 것으로 추정한 종목입니다. IRP·DC는 레버리지·인버스와 선물형(파생상품 위험평가액 40% 초과)을 살 수 없고 합성형은 일부만 가능, 연금저축은 레버리지·인버스만 불가라는 안내(증권사·운용사, 2021~2024)를 따랐습니다. 추정이므로 주문 전 증권사 앱에서 한 번 더 확인하세요.'],
     dryrun: ['주문 미리보기', '실제 주문 없이, 무엇을 몇 주 사고팔지 보여 줍니다. 돈이 나가지 않습니다. 증권사 연결 설정이 없으면 빈 계좌 기준으로 보여 줍니다.'],
     trade: ['실제 주문', '증권사 API로 실제 주문을 냅니다. 마지막에 \'주문\'이라고 직접 입력해야만 나갑니다. 먼저 미리보기로 확인하세요.'],
     stress: ['위기 시나리오', '2008년 금융위기·2020년 코로나 같은 과거 위기 기간의 자산군 움직임을 지금 구성에 적용해 본 추정입니다.'],
@@ -636,7 +644,7 @@
   function renderTodo(m) {   // 지금 할 일 (18장): 지금 단계 하나만 크게, 버튼 하나
     var box = document.getElementById('todo');
     if (!m.cmd) {   // 일반 탭, 또는 웹 사이트판(주문 기능 없음)
-      var uc = m.pension && m.pension.check ? m.pension.check.unconfirmed.length : 0;
+      var pc = m.pension && m.pension.check, uc = pc ? (pc.review || pc.unconfirmed).length : 0, ac = pc && pc.auto ? pc.auto.length : 0;
       var f = (m.mc && m.mc.final) || {}, pr = m.mc && m.mc.principalTotal, B = m.isPension ? META.bench : META.benchGeneral;
       var me = B ? B.rows.filter(function (r) { return r.key === 'model'; })[0] : null, mdd = me ? me.mdd : (m.wf && m.wf.mdd);
       var fix = B ? B.rows.filter(function (r) { return r.key === 'fixed'; })[0] : null;
@@ -645,9 +653,10 @@
                   ['최악일 때', mdd != null ? plainPct(mdd) : '-', mdd != null && fix ? (mdd >= fix.mdd - 0.5 ? 'good' : 'bad') : 'bad']];
       box.innerHTML = '<p class="step-k">지금 할 일</p><h3 class="step-t">' + (m.isPension ? '연금계좌' : '증권사 앱') + '에서 직접 주문</h3>' +
         '<div class="bignums">' + nums.map(function (n) { return '<div><small>' + n[0] + '</small><b class="' + n[2] + '">' + n[1] + '</b></div>'; }).join('') + '</div>' +
-        (uc ? '<span class="chip">주문 전 확인 필요 <b class="num">' + uc + '개</b>' + q('pcheck') + '</span>' : '') +
+        (uc ? '<span class="chip">주문 전 확인 필요 <b class="num">' + uc + '개</b>' + q('pcheck') + '</span> ' : '') +
+        (ac ? '<span class="chip">규정상 가능(자동) <b class="num">' + ac + '개</b>' + q('pauto') + '</span>' : '') +
         '<button type="button" class="cta" data-go="buy">' + (META.web ? '예시 종목·수량 보기' : '살 종목·수량 보기') + '</button>' +
-        (META.web ? '<ol class="stepdots"><li class="now">종목 확인</li><li>증권사 앱에서 주문</li><li>3개월마다 비중 점검</li></ol>' : '');
+        (META.web ? '<ol class="stepdots"><li class="now">종목 확인</li><li>증권사 앱에서 주문</li>' + ((m.monthlyPlan || []).length ? '<li>매달 적립</li>' : '') + '<li>3개월마다 비중 점검</li></ol>' : '');
       return;
     }
     var c = (m.pension && m.pension.check) || { total: m.count, confirmed: 0, unconfirmed: [] };
@@ -657,6 +666,7 @@
     var body = !allOk
       ? '<h3 class="step-t">연금 편입 확인' + q('pcheck') + ' <span class="num">' + c.confirmed + ' / ' + c.total + '</span></h3>' +
         '<div class="progress" role="img" aria-label="' + c.total + '개 중 ' + c.confirmed + '개 확인"><i style="width:' + (c.total ? c.confirmed / c.total * 100 : 0) + '%"></i></div>' +
+        (c.auto ? '<p class="sub">자동 판정' + q('pauto') + ': 규정상 가능 <b>' + c.auto.length + '개</b> · 확인 필요 <b>' + c.review.length + '개</b> — 주문은 표에 O를 적은 종목만</p>' : '') +
         '<button type="button" class="cta" data-go="check">확인하러 가기</button>' + checkHow(c)
       : '<h3 class="step-t">주문 미리보기' + q('dryrun') + '</h3><p class="sub">돈이 나가지 않습니다.</p>' +
         '<button type="button" class="cta" data-copy="' + esc(m.cmd) + '">명령어 복사</button>' +
@@ -687,6 +697,21 @@
       set('accPension', (bad ? '<span class="v-down">확인 필요 ' + bad + '건</span> · ' : '') + '환급 연 ' + (t.refunds[0] ? won(t.refunds[0].amount) : '-'));
     }
     set('accMore', '13년 검증 · 계좌 비교 · 용어');
+  }
+
+  function renderMonthly(m) {   // 매달 적립금으로 살 것 (22-2)
+    var P = m.monthlyPlan || [];
+    document.getElementById('sec-monthly').hidden = !P.length;
+    if (!P.length) return;
+    document.getElementById('monthlySub').innerHTML = '한 달에 가장 덜 담긴 ' + 3 + '종목만 · 팔지 않음' + q('monthly');
+    document.getElementById('monthlyCard').innerHTML = P.map(function (p) {
+      var list = p.buys.length ? '<ol class="cashlist">' + p.buys.map(function (b) {
+        return '<li><span class="rk"><i class="dot" style="background:var(' + CLASS_VAR[b.cls] + ')"></i></span><div class="bd"><b>' + esc(b.name) + '</b></div>' +
+          '<div class="rt num">' + b.qty + '주<small>' + won(b.amount) + '</small></div></li>'; }).join('') + '</ol>'
+        : '<p class="sub">이번 달은 모아 두기 (덜 담긴 종목 1주 가격이 남은 돈보다 비쌈)</p>';
+      return '<div class="cash-item"><h4>' + p.month + '개월 차<span class="num">적립 ' + won(p.deposit) + '</span></h4>' + list +
+        '<p class="sub">남는 돈 ' + won(p.left) + ' → 다음 달에 합쳐서</p></div>';
+    }).join('');
   }
 
   function renderCash(m) {   // 남는 현금 어디에 둘까 (16장)
@@ -769,11 +794,11 @@
     // 비중 큰 순서로 상위 6개만 기본으로, 나머지는 '자세히' 안에 (17장)
     var hs = m.holdings.slice().sort(function (a, b) { return b.pct - a.pct; });
     var maxP = hs.length ? hs[0].pct : 1, TOP = 6;
-    var fewUnconfirmed = hs.filter(function (h) { return h.unconfirmed; }).length <= 3;
+    var fewUnconfirmed = hs.filter(function (h) { return h.review; }).length <= 3;
     function row(h, i) {
       return '<li><span class="tl-rank num">' + (i + 1) + '</span>' +
         '<span class="tl-name" title="' + esc(h.name + ' (' + h.ticker + ')') + '"><i class="dot" style="background:var(' + CLASS_VAR[h.cls] + ')"></i>' + esc(h.name) +
-          (h.unconfirmed && fewUnconfirmed ? '<span class="muted">확인 전</span>' : '') + '</span>' +
+          (h.review && fewUnconfirmed ? '<span class="muted">확인 필요</span>' : '') + '</span>' +
         '<span class="tl-bar"><i style="width:' + (h.pct / maxP * 100) + '%;background:var(' + CLASS_VAR[h.cls] + ')"></i></span>' +
         '<span class="tl-pct num">' + h.pct.toFixed(1) + '%</span><span class="tl-amt num">' + won(h.amount) + '</span></li>';
     }
@@ -1160,7 +1185,7 @@
     var m = byKey[key]; if (!m) return;
     current = key;
     document.querySelectorAll('.mode-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.key === key)); });
-    renderHero(m); renderTodo(m); renderHoldings(m); renderCash(m); renderAcc(m); renderStress(m); renderFuture(m); renderPension(m); renderCompare(m); drawCharts(m);
+    renderHero(m); renderTodo(m); renderHoldings(m); renderMonthly(m); renderCash(m); renderAcc(m); renderStress(m); renderFuture(m); renderPension(m); renderCompare(m); drawCharts(m);
     if (document.getElementById('longBox').open) renderLong();
     hideTip();
     var box = document.getElementById('reportBox');
