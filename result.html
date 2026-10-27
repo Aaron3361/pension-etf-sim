@@ -577,6 +577,8 @@
     aftertax: ['세금 뗀 대략 금액', '연금으로 나눠 받을 때의 연금소득세 3.3~5.5%를 전체 금액에 그대로 곱한 대략값입니다. 실제 세금은 받는 나이·금액·방법에 따라 다릅니다.'],
     below: ['원금보다 적을 확률', '5,000번 계산 가운데 만기 금액이 그동안 넣은 원금(기초자금 + 적립액)보다 적게 끝난 비율입니다.'],
     pcheck: ['연금 편입 확인', '연금계좌에서는 일부 ETF(합성·파생형 등)를 살 수 없거나 위험자산으로 분류될 수 있습니다. 증권사 앱에서 연금계좌로 그 ETF를 살 수 있는지 확인하세요. (내 컴퓨터 프로그램은 표에 O를 적은 종목만 주문합니다.)'],
+    aftertax: ['세후 추정 (일반 계좌)', '일반 계좌는 세금을 뗍니다. 국내 상장 국내주식형은 매매차익 비과세·분배금 15.4%, 국내 상장 해외·채권 등은 매매차익과 분배금 모두 15.4%, 해외 상장 ETF는 매매차익 22%(연 250만원 공제)·분배금 15%로 계산했습니다(2026년 기준 추정). 매년 분배금 세금을 떼고 마지막에 모두 판다고 가정한 단순 추정이며, 금융소득이 연 2,000만원을 넘으면 붙는 종합과세는 넣지 않았습니다. 연금 계좌는 받을 때 연금소득세(3.3~5.5%)를 냅니다.'],
+    quarter: ['이번 분기 구성', '13년 검증과 같게, 종목과 추세 판단은 분기(1·4·7·10월)에 한 번만 정합니다. 그 사이 사이트가 매주 갱신돼도 종목·비중은 그대로이고 가격과 수량만 바뀝니다. 다음 점검일에 새 구성이 나오면 그때 비중을 맞추세요. 그 전에 상장폐지 등으로 살 수 없게 된 종목은 같은 자산군 다음 순위 종목으로 바뀝니다.'],
     monthly: ['매달 살 것', '매달 넣는 돈으로, 목표 비중보다 덜 담긴 종목을 1주씩 삽니다. 팔지 않고 비중을 맞추므로 매매 비용이 적고, 일반 계좌에서는 팔 때 생기는 세금도 피합니다. 처음 계획대로 샀고 가격은 그대로라고 가정한 예시이니, 실제로는 증권사 앱의 보유 비중을 보고 덜 담긴 종목부터 사세요. 연금 계좌는 연 납입 한도(1,800만원) 안에서만 계산합니다.'],
     pauto: ['규정상 가능 (자동 판정)', '규정 기준으로 연금계좌에서 살 수 있을 것으로 추정한 종목입니다. IRP·DC는 레버리지·인버스와 선물형(파생상품 위험평가액 40% 초과)을 살 수 없고 합성형은 일부만 가능, 연금저축은 레버리지·인버스만 불가라는 안내(증권사·운용사, 2021~2024)를 따랐습니다. 추정이므로 주문 전 증권사 앱에서 한 번 더 확인하세요.'],
     dryrun: ['주문 미리보기', '실제 주문 없이, 무엇을 몇 주 사고팔지 보여 줍니다. 돈이 나가지 않습니다. 증권사 연결 설정이 없으면 빈 계좌 기준으로 보여 줍니다.'],
@@ -654,6 +656,8 @@
       (recentOn ? '<p class="sub period-note">' + esc(String(B.recent.start).slice(0, 7)) + ' ~ ' + esc(String(B.recent.end).slice(0, 7)) + ' · 규칙을 고를 때 안 본 기간</p>' : '') +
       '<div class="brow head"><span></span><span>연평균</span><span>최대 하락' + q('mdd') + '</span></div>' + main.map(brow).join('') +
       '<p class="verdict ' + kind + '">' + esc(short) + '</p>' +
+      (me && fx && me.cagrAfterTax != null ? '<p class="sub">세후 추정' + q('aftertax') + ': 이 모델 연 <b>' + plainPct(me.cagrAfterTax) +
+        '</b> · 단순 고정 연 <b>' + plainPct(fx.cagrAfterTax) + '</b></p>' : '') +
       '<details class="bench-more"><summary>자세히 · 주식 전체·예금과 비교</summary>' + rest.map(brow).join('') +
       (!recentOn && B.verdict.detail ? '<p class="sub">' + esc(B.verdict.detail) + '</p>' : '') +
       (!recentOn && B.chips.length ? '<div class="chips">' + B.chips.map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</details>' +
@@ -675,7 +679,7 @@
         (uc ? '<span class="chip">주문 전 확인 필요 <b class="num">' + uc + '개</b>' + q('pcheck') + '</span> ' : '') +
         (ac ? '<span class="chip">규정상 가능(자동) <b class="num">' + ac + '개</b>' + q('pauto') + '</span>' : '') +
         '<button type="button" class="cta" data-go="buy">' + (META.web ? '예시 종목·수량 보기' : '살 종목·수량 보기') + '</button>' +
-        (META.web ? '<ol class="stepdots"><li class="now">종목 확인</li><li>증권사 앱에서 주문</li>' + ((m.monthlyPlan || []).length ? '<li>매달 적립</li>' : '') + '<li>3개월마다 비중 점검</li></ol>' : '');
+        (META.web ? '<ol class="stepdots"><li class="now">종목 확인</li><li>증권사 앱에서 주문</li>' + ((m.monthlyPlan || []).length ? '<li>매달 적립</li>' : '') + '<li>' + (m.rules && m.rules.quarter ? '다음 점검 ' + esc(m.rules.quarter.next.slice(5).replace('-', '/')) : '3개월마다 비중 점검') + '</li></ol>' : '');
       return;
     }
     var c = (m.pension && m.pension.check) || { total: m.count, confirmed: 0, unconfirmed: [] };
@@ -782,7 +786,10 @@
     var moveText = Object.keys(m.moves || {}).map(function (k) { return k + ' 후보가 없어 ' + k + ' 비중을 ' + m.moves[k] + '(으)로 배분'; }).join(' · ');
     var R = m.rules, ruleText = R && R.core ? '절반은 단순 고정(' + esc(R.core_tickers[0].replace('.KS', '') === '069500' ? 'KODEX 200' : R.core_tickers[0]) + ' ' +
       Math.round(R.core_stock_share * 100) + '% + 국고채3년)' + q('coresat') + ' · 추세 ' + (R.trend_down ? '<b class="v-down">하락 → 위험자산 절반을 채권으로</b>' : '상승') : '';
-    document.getElementById('buySub').innerHTML = [ruleText, moveText ? esc(moveText) + '했습니다.' : ''].filter(Boolean).join('<br>');
+    var Q = R && R.quarter, md = function (iso) { var p = String(iso).split('-'); return +p[1] + '월 ' + +p[2] + '일'; };
+    var qText = Q ? '<b>이번 분기 구성</b> (' + md(Q.decided) + ' 결정 · 다음 점검 ' + esc(Q.next) + ' 무렵)' + q('quarter') +
+      (Q.replaced && Q.replaced.length ? ' · 대체 ' + Q.replaced.length + '개' : '') : '';
+    document.getElementById('buySub').innerHTML = [qText, ruleText, moveText ? esc(moveText) + '했습니다.' : ''].filter(Boolean).join('<br>');
     var bar = document.getElementById('allocBar');
     bar.innerHTML = m.classes.filter(function (c) { return c.pct > 0; }).map(function (c) {
       return '<span style="width:' + c.pct + '%;background:var(' + CLASS_VAR[c.cls] + ')" title="' + c.cls + ' ' + c.pct.toFixed(1) + '%">' +
@@ -844,6 +851,10 @@
     document.getElementById('stressRest').innerHTML = rows(list.slice(3)) || '<p class="sub">더 없습니다.</p>';
   }
 
+  function afterTaxFinal(v, principal, years, t) {   // 일반 계좌 세후 (24-3): 매년 분배금 세금 + 끝에 모두 판다고 보고 차익 세금
+    var after = v * Math.pow(1 - t.divYield * t.divRate, years), gain = Math.max(0, after - principal);
+    return after - gain * t.domGainRate - Math.max(0, gain * t.foreignShare - 2500000) * 0.22;
+  }
   function renderFuture(m) {
     var mc = m.mc, f = mc.final || {};
     document.getElementById('futureTitle').textContent = '앞으로 ' + (mc.years || 10) + '년';
@@ -854,6 +865,7 @@
       '<div class="fnum"><div class="label">좋을 때' + q('range') + '</div><div class="value num">' + won(f.p90) + '</div></div>' +
       '<div class="fnum main"><div class="label">보통</div><div class="value num">' + won(f.p50) + '</div></div>' +
       '<div class="fnum"><div class="label">나쁠 때</div><div class="value num">' + won(f.p10) + '</div></div>' +
+      (m.taxProfile && f.p50 ? '<div class="fnum"><div class="label">세후 보통' + q('aftertax') + '</div><div class="value num">' + won(afterTaxFinal(f.p50, pr || 0, mc.years || 10, m.taxProfile)) + '</div></div>' : '') +
       (pr ? '<p class="foot num">넣은 원금 ' + won(pr) + (mc.below != null ? ' · 원금보다 적을 확률 <b>' + plainPct(mc.below, 1) + '</b>' + q('below') : '') + '</p>' : '');
     var rows = [
       ['목표 금액', won(mc.target) + (mc.targetDefault ? ' <span class="sub">(넣은 원금을 물가 연 2%만큼 불린 금액 = 실질 원금 지키기)</span>' : ' <span class="sub">(직접 입력한 목표)</span>') +
