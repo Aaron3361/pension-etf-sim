@@ -7,6 +7,10 @@
 <meta name="description" content="연금계좌 ETF 구성을 몇 가지 질문으로 계산해 보는 교육용 시뮬레이터 (투자 권유 아님)">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
+  /* 26장: 결과 화면으로 넘어갈 때 0.3초 겹쳐 흐려짐 (동작 줄이기면 끔) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .3s; animation-timing-function: ease-out; }
+  @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
   /* 토스 스타일 (dashboard.py와 같은 색): 질문 한 줄 + 큰 선택 카드 + 아래 고정 버튼 */
   :root { --bg: #f2f4f6; --surface: #fff; --surface-2: #f2f4f6; --seg: #e5e8eb; --border: #e5e8eb; --text: #191f28; --text-2: #4e5968;
           --muted: #8b95a1; --accent: #3182f6; --accent-soft: #e8f3ff; --gain: #f04452; --loss: #3182f6; --warn: #b86e00; --warn-soft: #fff4dc;

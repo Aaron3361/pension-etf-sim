@@ -355,9 +355,19 @@
   .to-top.show { opacity: 1; pointer-events: auto; }
 
   /* 스크롤하면 살짝 나타남 (움직임 줄이기 설정이면 끔) */
+  /* 26장 화면 전환 모션 (은은하게 0.2~0.4초, 동작 줄이기면 끔) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .3s; animation-timing-function: ease-out; }
+  :root { interpolate-size: allow-keywords; }
+  details::details-content { block-size: 0; overflow: hidden; transition: block-size .25s ease-out, content-visibility .25s allow-discrete; }
+  details[open]::details-content { block-size: auto; }
+  .mode-btn { transition: background-color .2s ease-out, color .2s ease-out, box-shadow .2s ease-out; }
+  .swap-in { animation: swapIn .22s ease-out; }
+  @keyframes swapIn { from { opacity: 0; transform: translateX(var(--swap-dx, 8px)); } to { opacity: 1; transform: none; } }
   .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
   .reveal.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; transition: none; } summary::after { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; transition: none; } summary::after { transition: none; }
+    @view-transition { navigation: none; } details::details-content { transition: none; } .swap-in { animation: none; } .mode-btn { transition: none; } }
 
   @media (max-width: 860px) {
     .grid-2, .grid-3, .long-grid { grid-template-columns: 1fr; }
@@ -402,7 +412,7 @@
   }
 </style>
 <style>.webbar{display:flex;justify-content:space-between;align-items:center;margin:0 4px 4px;font-size:14px}.webbar a{color:var(--accent);font-weight:600;text-decoration:none}.webbar button{font:inherit;font-size:13px;font-weight:600;color:var(--text-2);background:var(--surface);border:0;border-radius:10px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}</style>
-<style>.loading{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:var(--bg);transition:opacity .3s}.loading.out{opacity:0}.ld-in{width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:28px 24px;box-shadow:var(--shadow)}.ld-k{font-size:13px;font-weight:700;color:var(--accent)}.ld-in h2{margin-top:4px;font-size:20px}.ld-bar{height:8px;margin-top:16px;border-radius:4px;background:var(--seg);overflow:hidden}.ld-bar i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .25s}.ld-steps{list-style:none;margin-top:16px;font-size:14.5px;color:var(--muted)}.ld-steps li{padding:5px 0 5px 26px;position:relative}.ld-steps li::before{content:'';position:absolute;left:4px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--seg)}.ld-steps li.now{color:var(--text);font-weight:600}.ld-steps li.now::before{background:var(--accent);animation:ldp 1s infinite alternate}.ld-steps li.done{color:var(--text-2)}.ld-steps li.done::before{content:'✓';background:none;color:var(--accent);top:4px;left:2px;width:auto;height:auto;font-weight:700}.ld-note{margin-top:14px;font-size:13px;color:var(--muted)}@keyframes ldp{to{opacity:.35}}@media (prefers-reduced-motion: reduce){.ld-steps li.now::before{animation:none}}</style>
+<style>.loading{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:var(--bg);transition:opacity .3s}.loading.out{opacity:0}.loading.out .ld-in{transform:translateY(-8px) scale(.98)}.ld-in{transition:transform .3s ease-out;width:100%;max-width:420px;background:var(--surface);border-radius:20px;padding:28px 24px;box-shadow:var(--shadow)}.ld-k{font-size:13px;font-weight:700;color:var(--accent)}.ld-in h2{margin-top:4px;font-size:20px}.ld-bar{height:8px;margin-top:16px;border-radius:4px;background:var(--seg);overflow:hidden}.ld-bar i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .25s}.ld-steps{list-style:none;margin-top:16px;font-size:14.5px;color:var(--muted)}.ld-steps li{padding:5px 0 5px 26px;position:relative}.ld-steps li::before{content:'';position:absolute;left:4px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--seg)}.ld-steps li.now{color:var(--text);font-weight:600}.ld-steps li.now::before{background:var(--accent);animation:ldp 1s infinite alternate}.ld-steps li.done{color:var(--text-2)}.ld-steps li.done::before{content:'✓';background:none;color:var(--accent);top:4px;left:2px;width:auto;height:auto;font-weight:700}.ld-note{margin-top:14px;font-size:13px;color:var(--muted)}@keyframes ldp{to{opacity:.35}}@media (prefers-reduced-motion: reduce){.ld-steps li.now::before{animation:none}.loading,.ld-in{transition:none}}</style>
 </head>
 <body>
 <div class="loading" id="loading" role="status" aria-live="polite"><div class="ld-in"><p class="ld-k">결과 계산 중</p><h2 id="ldTitle">자료를 불러오고 있어요</h2><div class="ld-bar"><i id="ldBar" style="width:4%"></i></div><ol class="ld-steps" id="ldSteps"><li class="now">자료 불러오기</li><li>종목·수량 계산</li><li id="ldYears">앞으로 N년 5,000번 계산</li><li>화면 그리기</li></ol><p class="ld-note">보통 몇 초면 끝나요 · 입력한 금액은 이 브라우저 안에서만 계산해요</p></div></div>
@@ -621,8 +631,8 @@
     if (!b) return;
     benchPeriod = b.dataset.period;
     try { localStorage.setItem('bench-period', benchPeriod); } catch (e2) {}
-    var cur = byKey[current];
-    if (cur) renderHero(cur);
+    var cur = byKey[current], benchBox = document.getElementById('bench'), was = numsOf(benchBox);
+    if (cur) { renderHero(cur); countUp(benchBox, was); }
   });
   function renderHero(m) {   // 다른 방법과 비교 (18장): 이 모델 · 같은 흔들림 단순 고정 · 주식 전체 · 예금
     document.getElementById('heroEyebrow').innerHTML = '<b>' + esc(m.short) + ' 계좌</b> · ETF ' + m.count + '개';
@@ -1213,8 +1223,38 @@
     });
   }
 
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function numVal(txt) {   // '2억 5,713만원' → 257130000, '-9.9%' → -9.9 (숫자 없으면 null)
+    var e = txt.match(/(-?)(\d+)억/), m = txt.match(/([\d,]+)만/);
+    if (e || m) return (e && e[1] ? -1 : 1) * ((e ? +e[2] * 1e8 : 0) + (m ? +m[1].replace(/,/g, '') * 1e4 : 0));
+    var n = txt.match(/-?[\d,]+(\.\d+)?/);
+    return n ? parseFloat(n[0].replace(/,/g, '')) : null;
+  }
+  function countUp(root, from) {   // 26장: 큰 숫자를 이전 값(없으면 0)에서 새 값으로 0.4초 동안 (끝나면 원래 글자 그대로)
+    if (REDUCE || !root) return;
+    root.querySelectorAll('.bignums b, .fnum .value, #bench b').forEach(function (el, i) {
+      var txt = el.textContent, to = numVal(txt);
+      if (to == null) return;
+      var start = from && from[i] != null ? from[i] : 0;
+      if (start === to) return;
+      var isWon = /[억만]/.test(txt), n = txt.match(/-?[\d,]+(\.\d+)?/), dec = n && n[1] ? n[1].length - 1 : 0;
+      var fmt = isWon ? function (v) { return txt.replace(/-?(\d+억 ?)?[\d,]*만?원/, won(v)); }
+                      : function (v) { return txt.replace(n[0], v.toLocaleString('ko-KR', { minimumFractionDigits: dec, maximumFractionDigits: dec })); };
+      var t0 = performance.now(), fin = function () { el.textContent = txt; };
+      setTimeout(fin, 600);   // 화면이 숨겨져 애니메이션 프레임이 멈춰도 숫자는 반드시 원래 값으로
+      requestAnimationFrame(function step(t) {
+        var p = Math.min(1, (t - t0) / 400), k = 1 - Math.pow(1 - p, 3);
+        if (p < 1) { el.textContent = fmt(start + (to - start) * k); requestAnimationFrame(step); } else fin();
+      });
+    });
+  }
+  function numsOf(root) {
+    return root ? Array.prototype.map.call(root.querySelectorAll('.bignums b, .fnum .value, #bench b'), function (el) { return numVal(el.textContent); }) : [];
+  }
   function show(key) {
     var m = byKey[key]; if (!m) return;
+    var keys = MODES.map(function (x) { return x.key; }), dir = keys.indexOf(key) - keys.indexOf(current);
+    var main = document.querySelector('.wrap') || document.body, before = current ? numsOf(main) : null;
     current = key;
     document.querySelectorAll('.mode-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.key === key)); });
     renderHero(m); renderTodo(m); renderHoldings(m); renderMonthly(m); renderCash(m); renderAcc(m); renderStress(m); renderFuture(m); renderPension(m); renderCompare(m); drawCharts(m);
@@ -1223,6 +1263,11 @@
     var box = document.getElementById('reportBox');
     if (box.open) loadReport();
     try { localStorage.setItem('dashboard-mode', key); } catch (e) {}
+    if (!REDUCE) {
+      main.style.setProperty('--swap-dx', (dir < 0 ? -8 : 8) + 'px');
+      main.classList.remove('swap-in'); void main.offsetWidth; main.classList.add('swap-in');
+    }
+    countUp(main, before);
   }
 
   function loadReport() {
